@@ -712,9 +712,13 @@
                     <canvas id="canvas"></canvas>
                 </div>
 
-                <div class="controls">
+                <div class="controls" style="grid-template-columns: 1fr 1fr;">
                     <button onclick="startCamera()" class="btn-primary">📷 Start Camera</button>
                     <button onclick="capturePhoto()" id="capture-btn" disabled>Capture</button>
+                    <label class="file-upload-label" style="grid-column: span 2; text-align:center;">
+                        <input type="file" accept="image/*" onchange="uploadCheckImage(this)">
+                        📁 Or Upload Photo
+                    </label>
                     <button onclick="analyzeInstallation()" id="analyze-btn" class="btn-success" disabled style="grid-column: span 2;">🤖 AI Analysis</button>
                     <button onclick="resetCheck()" style="grid-column: span 2;">↺ Reset</button>
                 </div>
@@ -905,6 +909,37 @@
                 stream = null;
                 document.getElementById('camera-status').className = 'status-indicator status-inactive';
             }
+        }
+
+        function uploadCheckImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const video  = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx    = canvas.getContext('2d');
+
+            const img = new Image();
+            img.onload = () => {
+                canvas.width  = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                video.style.display  = 'none';
+                canvas.style.display = 'block';
+
+                canvas.toBlob(blob => {
+                    capturedImageData = blob;
+                    document.getElementById('analyze-btn').disabled = false;
+                }, 'image/jpeg', 0.95);
+
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                    document.getElementById('camera-status').className = 'status-indicator status-inactive';
+                }
+            };
+            img.src = URL.createObjectURL(file);
         }
 
         /* ── ANALYSE ── */
