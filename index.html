@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Meter Installation Compliance Checker</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-dark: #0a0e14;
+            --secondary-dark: #1a1f29;
+            --accent-steel: #3d5a80;
+            --accent-bright: #00b4d8;
+            --warning-yellow: #ffb703;
+            --danger-red: #d62828;
+            --success-green: #2a9d8f;
+            --text-primary: #e8eaed;
+            --text-secondary: #98a2b3;
+            --border-color: #2d3748;
+            --grid-pattern: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(61, 90, 128, 0.03) 2px,
+                rgba(61, 90, 128, 0.03) 4px
+            );
+            --touch-min: 48px;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100dvh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: var(--grid-pattern);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .container { padding: 20px; }
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--accent-steel) 100%);
+            padding: 20px;
+            border-left: 4px solid var(--accent-bright);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 180, 216, 0.1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        @media (min-width: 768px) {
+            header { padding: 30px; margin-bottom: 40px; }
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(0, 180, 216, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(1.2rem, 5vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-secondary);
+            font-size: clamp(0.75rem, 3vw, 0.9rem);
+            letter-spacing: 0.05em;
+        }
+
+        .firebase-row {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .firebase-row button {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            min-height: 36px;
+        }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab {
+            font-family: 'IBM Plex Mono', monospace;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 3vw, 0.95rem);
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            min-height: var(--touch-min);
+            flex-shrink: 0;
+        }
+
+        .tab:hover { color: var(--accent-bright); background: rgba(0, 180, 216, 0.05); }
+        .tab.active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
+
+        /* ── TAB CONTENT ── */
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .card { padding: 30px; margin-bottom: 25px; }
+        }
+
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            margin-bottom: 16px;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── CAMERA ── */
+        .camera-container {
+            position: relative;
+            background: #000;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            /* Fixed aspect ratio for consistent mobile display */
+            aspect-ratio: 4 / 3;
+        }
+
+        #video, #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        #canvas { display: none; }
+
+        /* ── CONTROLS / BUTTONS ── */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .controls.three-col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .controls.single { grid-template-columns: 1fr; }
+
+        @media (min-width: 600px) {
+            .controls { display: flex; flex-wrap: wrap; gap: 12px; }
+            .controls button, .controls .file-upload-label { width: auto; }
+        }
+
+        button {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--accent-steel);
+            color: var(--text-primary);
+            border: 1px solid var(--accent-bright);
+            padding: 12px 18px;
+            font-size: clamp(0.8rem, 3vw, 0.95rem);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            position: relative;
+            overflow: hidden;
+            min-height: var(--touch-min);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            touch-action: manipulation;
+        }
+
+        @media (min-width: 600px) {
+            button { width: auto; }
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: rgba(0, 180, 216, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before { width: 300px; height: 300px; }
+
+        button:hover {
+            background: var(--accent-bright);
+            border-color: var(--accent-bright);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-primary { background: var(--accent-bright); }
+        .btn-danger  { background: var(--danger-red); border-color: var(--danger-red); }
+        .btn-success { background: var(--success-green); border-color: var(--success-green); }
+
+        /* full-width button utility */
+        .btn-full { width: 100% !important; }
+
+        /* ── RESULT BOX ── */
+        .result-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--text-secondary);
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            line-height: 1.8;
+        }
+
+        .result-box.good { border-left-color: var(--success-green); background: rgba(42, 157, 143, 0.1); }
+        .result-box.bad  { border-left-color: var(--danger-red);    background: rgba(214, 40, 40, 0.1); }
+
+        .result-box h3 {
+            margin-bottom: 12px;
+            font-size: clamp(0.9rem, 4vw, 1.1rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ── LOADING ── */
+        .loading { display: none; text-align: center; padding: 30px; }
+        .loading.active { display: block; }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-bright);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ── COMPLIANCE GRID ── */
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 480px) { .compliance-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .compliance-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1200px){ .compliance-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .compliance-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .compliance-item:hover {
+            border-color: var(--accent-bright);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.2);
+        }
+
+        .compliance-item img {
+            width: 100%; height: 180px;
+            object-fit: cover; display: block;
+        }
+
+        .compliance-info { padding: 12px; }
+
+        .compliance-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'IBM Plex Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .badge-good { background: var(--success-green); color: white; }
+        .badge-bad  { background: var(--danger-red);    color: white; }
+
+        .compliance-notes { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* ── MODAL ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            border: 2px solid var(--accent-bright);
+            border-radius: 0;
+            width: 100%;
+            min-height: 100dvh;
+            padding: 60px 16px 32px;
+            position: relative;
+        }
+
+        @media (min-width: 600px) {
+            .modal {
+                align-items: center;
+                padding: 20px;
+            }
+            .modal-content {
+                max-width: 800px;
+                border-radius: 4px;
+                min-height: auto;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 30px;
+            }
+        }
+
+        .close-modal {
+            position: fixed;
+            top: 12px; right: 12px;
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 4px;
+            min-height: var(--touch-min);
+            min-width: var(--touch-min);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1100;
+        }
+
+        @media (min-width: 600px) {
+            .close-modal {
+                position: absolute;
+                top: 12px; right: 12px;
+            }
+        }
+
+        .close-modal:hover { color: var(--accent-bright); border-color: var(--accent-bright); }
+
+        /* ── FORM ELEMENTS ── */
+        textarea, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 16px; /* prevents iOS zoom */
+            border-radius: 4px;
+            margin-bottom: 12px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        textarea { min-height: 120px; resize: vertical; }
+
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-bright);
+            box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.1);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2398a2b3' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        /* ── FILE UPLOAD ── */
+        input[type="file"] { display: none; }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--accent-steel);
+            color: var(--text-primary);
+            padding: 12px 18px;
+            cursor: pointer;
+            border-radius: 2px;
+            border: 1px solid var(--accent-bright);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: clamp(0.8rem, 3vw, 0.95rem);
+            transition: all 0.3s ease;
+            min-height: var(--touch-min);
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        @media (min-width: 600px) {
+            .file-upload-label { width: auto; }
+        }
+
+        .file-upload-label:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        /* ── STATUS INDICATOR ── */
+        .status-indicator {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-active   { background: var(--success-green); }
+        .status-inactive { background: var(--text-secondary); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.5; }
+        }
+
+        /* ── INFO BANNER ── */
+        .info-banner {
+            background: rgba(0, 180, 216, 0.1);
+            border: 1px solid var(--accent-bright);
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ── ANNOTATION CANVAS WRAPPER ── */
+        .canvas-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+            border: 2px solid var(--accent-bright);
+            border-radius: 4px;
+            overflow: auto; /* allow panning if image is large */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #annotation-canvas {
+            display: block;
+            cursor: crosshair;
+            min-width: 100%; /* allows panning if wider than screen */
+        }
+
+        /* ── INLINE MARKER POPUP ── */
+        .marker-popup {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--secondary-dark);
+            border: 2px solid var(--accent-bright);
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 1200;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .marker-popup.active { display: block; }
+        .marker-popup .classify-row { margin-bottom: 16px; }
+        .marker-popup textarea { min-height: 90px; margin-bottom: 16px; font-size: 1rem; }
+        .marker-popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1199;
+        }
+        .marker-popup-overlay.active { display: block; }
+
+        /* ── CLASSIFICATION BUTTONS ── */
+        .classify-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        /* ── RESULT INNER BOXES ── */
+        .inner-box {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .inner-box h4 {
+            margin-bottom: 10px;
+            font-size: clamp(0.85rem, 3.5vw, 1rem);
+        }
+
+        .inner-box ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .inner-box ul li {
+            margin-bottom: 6px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: rgba(0, 180, 216, 0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+        }
+
+        /* ── REVIEW SECTION ── */
+        .review-section {
+            background: rgba(0, 180, 216, 0.1);
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border-left: 3px solid var(--accent-bright);
+        }
+
+        .review-section h4 {
+            color: var(--accent-bright);
+            margin-bottom: 12px;
+            font-size: clamp(0.85rem, 3.5vw, 1rem);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+
+        /* ── AI LEARNING NOTICE ── */
+        .ai-notice {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--warning-yellow);
+            background: rgba(255, 183, 3, 0.1);
+        }
+
+        .ai-notice p {
+            font-size: clamp(0.78rem, 2.8vw, 0.85rem);
+            color: var(--text-secondary);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Meter Compliance</h1>
+            <p class="subtitle">AI-Powered Quality Assurance</p>
+            <div class="firebase-row">
+                <button onclick="window.testFirebase()" style="width:auto;">Test Firebase</button>
+                <span id="firebase-status" style="font-size:0.8rem;">Firebase: Loading…</span>
+            </div>
+        </header>
+
+        <script>
+            setTimeout(() => {
+                const el = document.getElementById('firebase-status');
+                if (window.firebaseReady) {
+                    el.textContent = 'Firebase: ✓ Connected';
+                    el.style.color = 'var(--success-green)';
+                } else {
+                    el.textContent = 'Firebase: ✗ Not Ready';
+                    el.style.color = 'var(--danger-red)';
+                }
+            }, 2000);
+        </script>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('check', this)">📸 Installation Check</button>
+            <button class="tab" onclick="switchTab('compliance', this)">🎓 Compliance Training</button>
+        </div>
+
+        <!-- Installation Check Tab -->
+        <div id="check-tab" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">📸 Capture Installation</h2>
+                <div class="info-banner">
+                    <span class="status-indicator status-inactive" id="camera-status"></span>
+                    Take a photo of the smart meter installation. AI will analyse it against your compliance training data.
+                </div>
+
+                <label class="form-label" style="text-align:left;">Select Meter Type:</label>
+                <select id="analyze-meter-type" style="margin-bottom: 20px; font-weight:bold; color:var(--accent-bright);">
+                    <option value="electric">⚡ Electric Meter</option>
+                    <option value="gas">🔥 Gas Meter</option>
+                </select>
+
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+
+                <div class="controls">
+                    <button onclick="startCamera()" class="btn-primary">📷 Start Camera</button>
+                    <button onclick="capturePhoto()" id="capture-btn" disabled>Capture</button>
+                    <button onclick="analyzeInstallation()" id="analyze-btn" class="btn-success" disabled style="grid-column: span 2;">🤖 AI Analysis</button>
+                    <button onclick="resetCheck()" style="grid-column: span 2;">↺ Reset</button>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem;">Analysing against compliance standards…</p>
+                </div>
+
+                <div id="results"></div>
+            </div>
+        </div>
+
+        <!-- Compliance Training Tab -->
+        <div id="compliance-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">🎓 Compliance Training</h2>
+                <div class="info-banner">
+                    Upload reference photos and annotate good or bad practices. The AI learns from your examples.
+                </div>
+
+                <div class="controls single" style="display:flex; flex-direction:column; gap:12px;">
+                    <select id="filter-meter-type" onchange="loadComplianceData()" style="width:100%; font-weight:bold;">
+                        <option value="all">View All Meter Types</option>
+                        <option value="electric">⚡ Electric Meters Only</option>
+                        <option value="gas">🔥 Gas Meters Only</option>
+                    </select>
+                    <label class="file-upload-label">
+                        <input type="file" id="compliance-upload" accept="image/*" onchange="uploadComplianceImage()">
+                        📁 Upload Reference Photo
+                    </label>
+                </div>
+
+                <div id="compliance-list" class="compliance-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding compliance notes -->
+    <div id="compliance-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">✕</button>
+            <h2 class="card-title" id="modal-title">Annotate Reference Photo</h2>
+
+            <label class="form-label" style="text-align:left;">Meter Type:</label>
+            <select id="modal-meter-type" style="margin-bottom: 16px; font-weight:bold;">
+                <option value="electric">⚡ Electric Meter</option>
+                <option value="gas">🔥 Gas Meter</option>
+            </select>
+
+            <div class="canvas-wrapper" id="canvas-scroll-container">
+                <canvas id="annotation-canvas"></canvas>
+            </div>
+            <p style="margin-bottom:14px; color:var(--text-secondary); font-size:0.85rem;">
+                💡 Tap the image to place numbered markers on problem areas or good practices.
+            </p>
+
+            <div class="marker-popup-overlay" id="marker-popup-overlay" onclick="cancelMarkerPopup()"></div>
+            <div class="marker-popup" id="marker-popup">
+                <h3 style="margin-bottom:14px; font-size:1.1rem; color:var(--text-primary);">
+                    📍 Add Marker <span style="background:var(--accent-bright);color:#0a0e14;padding:2px 8px;border-radius:50%;">#<span id="popup-marker-num"></span></span>
+                </h3>
+                <label class="form-label">Is this Good or Bad?</label>
+                <div class="classify-row">
+                    <button id="popup-btn-good" class="btn-success" onclick="selectPopupVerdict('good')" style="opacity:0.5; padding:12px;">✓ Good</button>
+                    <button id="popup-btn-bad" class="btn-danger" onclick="selectPopupVerdict('bad')" style="opacity:0.5; padding:12px;">✗ Bad</button>
+                </div>
+                <label class="form-label">Brief Description:</label>
+                <textarea id="popup-desc" placeholder="e.g., 'Correct clips present on tails'"></textarea>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-danger" onclick="cancelMarkerPopup()" style="flex:1; width:auto;">Cancel</button>
+                    <button class="btn-primary" onclick="saveMarkerPopup()" style="flex:1; width:auto;">Save</button>
+                </div>
+            </div>
+
+            <label class="form-label">Placed Markers:</label>
+            <div id="annotation-summary" style="margin-bottom:20px;"></div>
+
+            <div class="controls">
+                <button onclick="clearAnnotations()" class="btn-danger">Clear Markers</button>
+                <button onclick="saveComplianceData()" class="btn-primary">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBb9x_7RJcsg0Iw2whRylbybuQNuLr6Yco",
+            authDomain: "meter-install-check.firebaseapp.com",
+            projectId: "meter-install-check",
+            storageBucket: "meter-install-check.firebasestorage.app",
+            messagingSenderId: "238786946643",
+            appId: "1:238786946643:web:f1965fca6d3b79ef5e08a6",
+            measurementId: "G-9Y7DNDQHQN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        const db = getFirestore(app);
+
+        window.firebaseApp = app;
+        window.storage = storage;
+        window.db = db;
+        window.storageRef = ref;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
+        window.listAll = listAll;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+        window.firebaseReady = true;
+
+        setTimeout(() => loadComplianceData(), 1000);
+    </script>
+
+    <script>
+        let stream = null;
+        let capturedImageData = null;
+        let currentUploadedImage = null;
+        let currentClassification = null;
+        let complianceData = [];
+        let annotations = [];
+        let annotationCanvas = null;
+        let annotationCtx = null;
+        let baseImage = null;
+        let parsedAnnotations = {}; // { number: { verdict:'good'|'bad', description:string } }
+
+        /* ── TAB SWITCHING ── */
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+            if (tab === 'compliance') loadComplianceData();
+        }
+
+        /* ── CAMERA ── */
+        async function startCamera() {
+            try {
+                if (stream) stream.getTracks().forEach(t => t.stop());
+
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false
+                });
+
+                const video = document.getElementById('video');
+                const canvas = document.getElementById('canvas');
+                video.srcObject = stream;
+
+                await new Promise(resolve => { video.onloadedmetadata = () => { video.play(); resolve(); }; });
+
+                video.style.display = 'block';
+                canvas.style.display = 'none';
+                document.getElementById('capture-btn').disabled = false;
+                document.getElementById('camera-status').className = 'status-indicator status-active';
+            } catch (err) {
+                alert('Error accessing camera: ' + err.message + '\n\nPlease grant camera permissions.');
+            }
+        }
+
+        function capturePhoto() {
+            const video  = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx    = canvas.getContext('2d');
+
+            canvas.width  = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            video.style.display  = 'none';
+            canvas.style.display = 'block';
+
+            canvas.toBlob(blob => {
+                capturedImageData = blob;
+                document.getElementById('analyze-btn').disabled = false;
+            }, 'image/jpeg', 0.95);
+
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+                stream = null;
+                document.getElementById('camera-status').className = 'status-indicator status-inactive';
+            }
+        }
+
+        /* ── ANALYSE ── */
+        async function analyzeInstallation() {
+            if (!capturedImageData) { alert('Please capture a photo first'); return; }
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').innerHTML = '';
+
+            try {
+                const meterTypeToAnalyze = document.getElementById('analyze-meter-type').value;
+                const base64Image = await blobToBase64(capturedImageData);
+
+                const timestamp   = Date.now();
+                const fileName    = `inspection_${timestamp}.jpg`;
+                const imageRef    = window.storageRef(window.storage, `InspectionPhotos/${fileName}`);
+                await window.uploadBytes(imageRef, capturedImageData, {
+                    contentType: 'image/jpeg',
+                    customMetadata: { type: 'inspection', timestamp: new Date().toISOString() }
+                });
+                const imageUrl = await window.getDownloadURL(imageRef);
+
+                const visionResponse = await analyzeWithVisionAPI(base64Image);
+                const knowledgeBase  = buildKnowledgeBase(meterTypeToAnalyze);
+                const analysis       = compareWithTraining(visionResponse, knowledgeBase);
+
+                displayAIAnalysis(analysis, imageUrl, fileName, visionResponse);
+
+            } catch (error) {
+                let msg = error.message;
+                if (msg.includes('API key')) msg = 'Google Cloud Vision API key error.';
+                if (msg.includes('quota'))   msg = 'API quota exceeded.';
+                document.getElementById('results').innerHTML = `
+                    <div class="result-box bad">
+                        <h3>⚠ Analysis Error</h3>
+                        <p>${msg}</p>
+                    </div>`;
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        async function analyzeWithVisionAPI(base64Image) {
+            const apiKey = 'AIzaSyAc_yJQ_rkzuOBh-Yxg0Q4eooXtB-tQjm0';
+            const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requests: [{ image: { content: base64Image }, features: [
+                    { type: 'LABEL_DETECTION',      maxResults: 20 },
+                    { type: 'OBJECT_LOCALIZATION',  maxResults: 20 },
+                    { type: 'TEXT_DETECTION' },
+                    { type: 'IMAGE_PROPERTIES' }
+                ]}]})
+            });
+            if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Vision API failed'); }
+            const data = await res.json();
+            return data.responses[0];
+        }
+
+        function buildKnowledgeBase(targetMeterType) {
+            const kb = { goodPhrases:[], badPhrases:[], goodTerms:{}, badTerms:{} };
+            complianceData.forEach(item => {
+                const itemType = item.meterType || 'electric'; // defaults legacy to electric
+                if (targetMeterType && itemType !== targetMeterType) return;
+
+                if (item.annotations && item.annotations.length > 0) {
+                    item.annotations.forEach(ann => {
+                        if (!ann.verdict || !ann.description) return;
+                        const terms = extractKeyTerms(ann.description);
+                        if (ann.verdict === 'good') {
+                            terms.forEach(t => { kb.goodTerms[t] = (kb.goodTerms[t]||0)+1; });
+                            kb.goodPhrases.push({ terms, description: ann.description, region: ann.region });
+                        } else {
+                            terms.forEach(t => { kb.badTerms[t] = (kb.badTerms[t]||0)+1; });
+                            kb.badPhrases.push({ terms, description: ann.description, region: ann.region });
+                        }
+                    });
+                } else {
+                    // legacy: whole-image classification
+                    const terms = extractKeyTerms(item.notes||'');
+                    const bucket = item.classification==='good' ? kb.goodTerms : kb.badTerms;
+                    terms.forEach(t => { bucket[t]=(bucket[t]||0)+1; });
+                    const arr = item.classification==='good' ? kb.goodPhrases : kb.badPhrases;
+                    arr.push({ terms, description: item.notes||'' });
+                }
+            });
+            return kb;
+        }
+
+        function extractKeyTerms(text) {
+            const keywords = ['cable','cables','wiring','wire','tails','meter','level','secure','mounting',
+                'label','labels','seal','seals','clearance','space','housing','enclosure','debris','clean',
+                'tidy','neat','exposed','covered','protected','earthing','earth','ground','management',
+                'organized','messy','loose','tight','conduit','pipe','bracket','terminals','connection',
+                'bonding','routing','hanging','drooping','strain','isolated','damage','missing','present',
+                'correct','incorrect','proper','improper','corrosion','ingress','moisture','intact'];
+            const found=[], lower=(text||'').toLowerCase();
+            keywords.forEach(k => { if(lower.includes(k)) found.push(k); });
+            return [...new Set(found)];
+        }
+
+        function compareWithTraining(visionData, kb) {
+            const analysis = {
+                detectedObjects:[], detectedText:'',
+                specificIssues:[], goodPractices:[], missingFeatures:[],
+                overallScore:0, isCompliant:false
+            };
+            const labels  = (visionData.labelAnnotations||[]).map(l=>l.description.toLowerCase());
+            const objects = (visionData.localizedObjectAnnotations||[]).map(o=>o.name.toLowerCase());
+            const text    = visionData.fullTextAnnotation?.text||'';
+            analysis.detectedObjects=[...labels,...objects]; analysis.detectedText=text;
+
+            const detected=term=>labels.some(l=>l.includes(term))||objects.some(o=>o.includes(term))||text.toLowerCase().includes(term);
+
+            kb.badPhrases.forEach(phrase=>{
+                if(!phrase.terms.length) return;
+                const matched=phrase.terms.filter(t=>detected(t));
+                const ratio=matched.length/phrase.terms.length;
+                if(ratio>=0.4){
+                    const ex=analysis.specificIssues.find(i=>i.description===phrase.description);
+                    if(ex){ex.count++;}
+                    else analysis.specificIssues.push({description:phrase.description,severity:ratio>=0.7?'high':'medium',count:1,matched});
+                    analysis.overallScore-=ratio>=0.7?20:10;
+                }
+            });
+            kb.goodPhrases.forEach(phrase=>{
+                if(!phrase.terms.length) return;
+                const ratio=phrase.terms.filter(t=>detected(t)).length/phrase.terms.length;
+                if(ratio>=0.4){
+                    const ex=analysis.goodPractices.find(g=>g.description===phrase.description);
+                    if(ex){ex.count++;} else analysis.goodPractices.push({description:phrase.description,count:1});
+                    analysis.overallScore+=ratio>=0.7?15:8;
+                }
+            });
+            ['cable','meter','label'].forEach(term=>{ if(!detected(term)){analysis.missingFeatures.push(term);analysis.overallScore-=15;} });
+            analysis.isCompliant=analysis.overallScore>0&&analysis.specificIssues.filter(i=>i.severity==='high').length===0;
+            return analysis;
+        }
+
+        function displayAIAnalysis(analysis, imageUrl, fileName, visionData) {
+            const cls = analysis.isCompliant ? 'good' : 'bad';
+            const icon = analysis.isCompliant ? '✓' : '✗';
+            const txt  = analysis.isCompliant ? 'COMPLIANT' : 'NON-COMPLIANT';
+
+            const issuesHTML = analysis.specificIssues.length > 0 ? `
+                <div class="inner-box" style="background:rgba(214,40,40,0.12);border-left:3px solid var(--danger-red);">
+                    <h4 style="color:var(--danger-red);margin-bottom:12px;">⚠ Issues Detected From Training Data</h4>
+                    ${analysis.specificIssues.map(issue=>`
+                    <div style="margin-bottom:10px;padding:10px;background:rgba(0,0,0,0.25);border-radius:4px;border-left:2px solid ${issue.severity==='high'?'var(--danger-red)':'var(--warning-yellow)'}">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                            <span style="background:${issue.severity==='high'?'var(--danger-red)':'var(--warning-yellow)'};color:#fff;font-size:0.7rem;padding:2px 7px;border-radius:2px;font-weight:700;">${issue.severity.toUpperCase()}</span>
+                            <strong style="font-size:0.9rem;">${issue.description}</strong>
+                        </div>
+                        <div style="font-size:0.78rem;color:var(--text-secondary);">Matched ${issue.count} training example${issue.count>1?'s':''}. Keywords: ${issue.matched.join(', ')}</div>
+                    </div>`).join('')}
+                </div>` : '';
+
+            const missingHTML = analysis.missingFeatures.length > 0 ? `
+                <div class="inner-box" style="background:rgba(214,40,40,0.1);border-left:3px solid var(--danger-red);">
+                    <h4 style="color:var(--danger-red);">❌ Critical Features Not Detected</h4>
+                    <ul>${analysis.missingFeatures.map(f=>`<li>${f[0].toUpperCase()+f.slice(1)} not clearly visible in image</li>`).join('')}</ul>
+                    <p style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);">Verify manually if correct angle wasn't captured.</p>
+                </div>` : '';
+
+            const goodHTML = analysis.goodPractices.length > 0 ? `
+                <div class="inner-box" style="background:rgba(42,157,143,0.1);border-left:3px solid var(--success-green);">
+                    <h4 style="color:var(--success-green);">✓ Good Practices Confirmed</h4>
+                    <ul>${analysis.goodPractices.slice(0,6).map(g=>`<li>${g.description} <span style="color:var(--text-secondary);font-size:0.8rem;">(${g.count} example${g.count>1?'s':''})</span></li>`).join('')}</ul>
+                </div>` : '';
+
+            const detectedHTML = analysis.detectedObjects.length > 0 ? `
+                <div class="inner-box" style="background:rgba(0,180,216,0.1);border-left:3px solid var(--accent-bright);">
+                    <h4 style="color:var(--accent-bright);">🔍 AI Vision Detected</h4>
+                    <div class="tag-row">${analysis.detectedObjects.slice(0,15).map(o=>`<span class="tag">${o}</span>`).join('')}</div>
+                </div>` : '';
+
+            document.getElementById('results').innerHTML = `
+                <div class="result-box ${cls}">
+                    <h3>${icon} Installation ${txt}</h3>
+                    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:0.85rem;">
+                        Score: ${analysis.overallScore} &nbsp;|&nbsp; ${complianceData.length} training example${complianceData.length!==1?'s':''}
+                    </p>
+                    <div style="background:rgba(0,0,0,0.2);padding:12px;border-radius:6px;margin-bottom:14px;">
+                        <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;"><strong>Photo:</strong> ${fileName}</p>
+                        <a href="${imageUrl}" target="_blank" style="color:var(--accent-bright);font-size:0.88rem;">🔗 View Full Size</a>
+                    </div>
+                    ${missingHTML}${issuesHTML}${goodHTML}${detectedHTML}
+                    <div class="review-section">
+                        <h4>📝 Final Review</h4>
+                        <label class="form-label">Confirm Installation Status:</label>
+                        <select id="reviewStatus">
+                            <option value="">Select status…</option>
+                            <option value="great" ${analysis.isCompliant?'selected':''}>⭐ Great Install</option>
+                            <option value="passable">✓ Passable Install</option>
+                            <option value="minor">⚠ Minor Issues</option>
+                            <option value="major" ${!analysis.isCompliant?'selected':''}>❌ Major Issues</option>
+                        </select>
+                        <label class="form-label">Additional Notes:</label>
+                        <textarea id="reviewNotes" placeholder="Add any manual observations or corrections…"></textarea>
+                        <button onclick="saveAIReviewReport('${imageUrl}','${fileName}',${JSON.stringify(analysis).replace(/"/g,'&quot;')})" class="btn-primary btn-full">💾 Save Review Report</button>
+                    </div>
+                    <div class="ai-notice">
+                        <p>${complianceData.length > 0
+                            ? `🤖 <strong>AI Learning:</strong> Learned from ${complianceData.length} annotated example${complianceData.length!==1?'s':''}. Add more to improve accuracy!`
+                            : `⚠ <strong>No Training Data:</strong> Upload compliance examples to teach the AI what to look for!`}
+                        </p>
+                    </div>
+                </div>`;
+        }
+
+        window.saveAIReviewReport = async function(imageUrl, fileName, analysis) {
+            const status = document.getElementById('reviewStatus').value;
+            const notes  = document.getElementById('reviewNotes').value.trim();
+            if (!status) { alert('Please select an installation status'); return; }
+
+            try {
+                await window.addDoc(window.collection(window.db, 'InspectionReviews'), {
+                    timestamp: new Date().toISOString(),
+                    status, notes, imageUrl, fileName,
+                    aiAnalysis: analysis,
+                    reviewType: 'AI-Powered',
+                    trainingExamplesUsed: complianceData.length,
+                    createdAt: Date.now()
+                });
+                alert('✓ Report saved!\nStatus: ' + status.toUpperCase() + '\nAI Score: ' + analysis.overallScore);
+                document.getElementById('reviewStatus').value = '';
+                document.getElementById('reviewNotes').value  = '';
+            } catch (error) {
+                alert('Error saving review: ' + error.message);
+            }
+        };
+
+        function resetCheck() {
+            const video  = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            video.style.display  = 'block';
+            canvas.style.display = 'none';
+            capturedImageData = null;
+            document.getElementById('analyze-btn').disabled = true;
+            document.getElementById('results').innerHTML = '';
+        }
+
+        /* ── COMPLIANCE UPLOAD & ANNOTATION ── */
+        async function uploadComplianceImage() {
+            const file = document.getElementById('compliance-upload').files[0];
+            if (!file) return;
+            currentUploadedImage = file;
+            annotations = [];
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => { baseImage = img; setupAnnotationCanvas(img); document.getElementById('compliance-modal').classList.add('active'); };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupAnnotationCanvas(img) {
+            annotationCanvas = document.getElementById('annotation-canvas');
+            annotationCtx    = annotationCanvas.getContext('2d');
+            annotationCanvas.width  = img.width;
+            annotationCanvas.height = img.height;
+            parsedAnnotations = {};
+            updateAnnotationSummary();
+            redrawCanvas();
+            annotationCanvas.onclick = handleCanvasTap;
+            // Removed touch-action:none and ontouchend to allow native mobile panning/zooming.
+            // Click event covers tapping gracefully after native actions.
+        }
+
+        let pendingMarker = null;
+
+        function handleCanvasTap(e) {
+            if (pendingMarker) return; // Prevent double trigger
+            
+            const rect   = annotationCanvas.getBoundingClientRect();
+            const scaleX = annotationCanvas.width  / rect.width;
+            const scaleY = annotationCanvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top)  * scaleY;
+            
+            const nextNum = Object.keys(parsedAnnotations).length + 1;
+            pendingMarker = { x, y, number: nextNum, verdict: null };
+
+            document.getElementById('popup-marker-num').textContent = pendingMarker.number;
+            document.getElementById('popup-desc').value = '';
+            document.getElementById('popup-btn-good').style.opacity = '0.5';
+            document.getElementById('popup-btn-bad').style.opacity = '0.5';
+            
+            document.getElementById('marker-popup-overlay').classList.add('active');
+            document.getElementById('marker-popup').classList.add('active');
+            document.getElementById('popup-desc').focus();
+        }
+
+        function selectPopupVerdict(v) {
+            if (!pendingMarker) return;
+            pendingMarker.verdict = v;
+            document.getElementById('popup-btn-good').style.opacity = v === 'good' ? '1' : '0.5';
+            document.getElementById('popup-btn-bad').style.opacity = v === 'bad' ? '1' : '0.5';
+        }
+
+        function cancelMarkerPopup() {
+            pendingMarker = null;
+            document.getElementById('marker-popup-overlay').classList.remove('active');
+            document.getElementById('marker-popup').classList.remove('active');
+        }
+
+        function saveMarkerPopup() {
+            if (!pendingMarker || !pendingMarker.verdict) { alert('Please tap Good or Bad.'); return; }
+            const desc = document.getElementById('popup-desc').value.trim();
+            if (!desc) { alert('Please enter a brief description.'); return; }
+
+            pendingMarker.description = desc;
+            
+            annotations.push({ x: pendingMarker.x, y: pendingMarker.y, number: pendingMarker.number });
+            parsedAnnotations[pendingMarker.number] = { verdict: pendingMarker.verdict, description: desc };
+            
+            cancelMarkerPopup();
+            updateAnnotationSummary();
+            redrawCanvas();
+        }
+
+        function updateAnnotationSummary() {
+            const summaryEl = document.getElementById('annotation-summary');
+            if (Object.keys(parsedAnnotations).length === 0) {
+                summaryEl.innerHTML = '<p style="font-size:0.85rem; color:var(--text-secondary);">No markers placed yet. Tap the image to add one.</p>';
+                return;
+            }
+
+            const vals = Object.values(parsedAnnotations);
+            const hasBad = vals.some(v=>v.verdict==='bad');
+            const hasGood = vals.some(v=>v.verdict==='good');
+            currentClassification = hasBad ? 'bad' : hasGood ? 'good' : null;
+
+            summaryEl.innerHTML = Object.entries(parsedAnnotations).map(([num,p])=>`
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:0.85rem; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:4px; border-left:3px solid ${p.verdict==='good'?'var(--success-green)':'var(--danger-red)'};">
+                    <span style="background:${p.verdict==='good'?'var(--success-green)':'var(--danger-red)'};color:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-weight:700;flex-shrink:0;">${num}</span>
+                    <span style="color:${p.verdict==='good'?'var(--success-green)':'var(--danger-red)'};font-weight:700;font-size:0.8rem;text-transform:uppercase;min-width:35px;">${p.verdict}</span>
+                    <span style="color:var(--text-primary);flex-grow:1;">${p.description}</span>
+                </div>`).join('');
+        }
+
+        function redrawCanvas() {
+            if (!baseImage || !annotationCtx) return;
+            annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height);
+            annotationCtx.drawImage(baseImage, 0, 0, annotationCanvas.width, annotationCanvas.height);
+            annotations.forEach(ann => {
+                const r = Math.max(26, annotationCanvas.width * 0.04); /* Larger markers */
+                const pa = parsedAnnotations[ann.number];
+                const fill   = pa?.verdict==='good' ? 'rgba(42,157,143,0.88)' : pa?.verdict==='bad' ? 'rgba(214,40,40,0.88)' : 'rgba(255,183,3,0.8)';
+                const stroke = pa?.verdict==='good' ? '#2a9d8f' : pa?.verdict==='bad' ? '#d62828' : '#ffb703';
+                annotationCtx.beginPath();
+                annotationCtx.arc(ann.x, ann.y, r, 0, 2*Math.PI);
+                annotationCtx.fillStyle = fill;
+                annotationCtx.fill();
+                annotationCtx.strokeStyle = stroke;
+                annotationCtx.lineWidth = Math.max(2, r*0.18);
+                annotationCtx.stroke();
+                annotationCtx.fillStyle = '#fff';
+                annotationCtx.font = `bold ${Math.round(r*1.15)}px Arial`;
+                annotationCtx.textAlign = 'center';
+                annotationCtx.textBaseline = 'middle';
+                annotationCtx.fillText(ann.number.toString(), ann.x, ann.y);
+            });
+        }
+
+        function clearAnnotations() { annotations = []; parsedAnnotations={}; updateAnnotationSummary(); redrawCanvas(); }
+
+        function setClassification(type) {
+            currentClassification = type;
+            document.getElementById('class-good').style.opacity = type === 'good' ? '1' : '0.5';
+            document.getElementById('class-bad').style.opacity  = type === 'bad'  ? '1' : '0.5';
+        }
+
+        async function saveComplianceData() {
+            if (!window.firebaseReady) { alert('Firebase still initializing – try again in a moment.'); return; }
+            if (!currentUploadedImage) { alert('No image selected'); return; }
+            if (Object.keys(parsedAnnotations).length === 0) { alert('Please tap the image to place at least one marker.'); return; }
+
+            const meterTypeToSave = document.getElementById('modal-meter-type').value;
+
+            const annotated = Object.keys(parsedAnnotations).map(numStr => {
+                const num = parseInt(numStr);
+                const ann = annotations.find(a => a.number === num);
+                const p = parsedAnnotations[num];
+                return {
+                    number: num,
+                    x: ann.x, y: ann.y,
+                    verdict: p.verdict,
+                    description: p.description,
+                    relativeX: (ann.x / baseImage.width) * 100,
+                    relativeY: (ann.y / baseImage.height) * 100,
+                    region: determineImageRegion(ann.x, ann.y, baseImage.width, baseImage.height)
+                };
+            });
+            const hasBad = annotated.some(a=>a.verdict==='bad');
+            const hasGood = annotated.some(a=>a.verdict==='good');
+            currentClassification = hasBad ? 'bad' : hasGood ? 'good' : 'unknown';
+
+            // Generate legacy 'notes' string for backward compatibility
+            const notes = annotated.map(a => `${a.number}-${a.verdict}-${a.description}`).join('\n');
+
+            try {
+                const numberedAnnotations = annotated;
+                let finalBlob = currentUploadedImage;
+
+                if (annotations.length > 0) {
+                    finalBlob = await new Promise((res, rej) =>
+                        annotationCanvas.toBlob(b => b ? res(b) : rej(new Error('Blob failed')), 'image/jpeg', 0.95));
+                }
+
+                const ts       = Date.now();
+                const fileName = `${currentClassification}_${ts}.jpg`;
+                const imageRef = window.storageRef(window.storage, `ComplianceMeterChecks/${fileName}`);
+
+                await window.uploadBytes(imageRef, finalBlob, {
+                    contentType: 'image/jpeg',
+                    customMetadata: { classification: currentClassification, annotationCount: String(annotations.length) }
+                });
+                const imageUrl = await window.getDownloadURL(imageRef);
+
+                const docRef = await window.addDoc(window.collection(window.db, 'ComplianceMeterChecks'), {
+                    classification: currentClassification,
+                    meterType: meterTypeToSave,
+                    notes, imageUrl, fileName,
+                    storagePath: `ComplianceMeterChecks/${fileName}`,
+                    annotations: numberedAnnotations,
+                    annotationCount: annotations.length,
+                    imageWidth: baseImage.width,
+                    imageHeight: baseImage.height,
+                    timestamp: new Date().toISOString(),
+                    createdAt: ts
+                });
+
+                const summary = numberedAnnotations.length > 0
+                    ? '\n\n' + numberedAnnotations.map(a => `• Marker ${a.number}: ${a.description}`).join('\n')
+                    : '';
+                alert('✓ Saved successfully!' + summary + '\nID: ' + docRef.id);
+                closeModal();
+                setTimeout(loadComplianceData, 500);
+
+            } catch (error) {
+                alert('❌ Error saving:\n\n' + error.message + '\n\nCheck browser console for details.');
+            }
+        }
+
+
+
+        function determineImageRegion(x, y, w, h) {
+            const rx = x / w, ry = y / h;
+            return `${ry < 0.33 ? 'top' : ry > 0.66 ? 'bottom' : 'middle'}-${rx < 0.33 ? 'left' : rx > 0.66 ? 'right' : 'center'}`;
+        }
+
+        async function loadComplianceData() {
+            try {
+                const filterType = document.getElementById('filter-meter-type')?.value || 'all';
+                const snap = await window.getDocs(window.collection(window.db, 'ComplianceMeterChecks'));
+                complianceData = [];
+                const listDiv = document.getElementById('compliance-list');
+                listDiv.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:20px;">Loading…</p>';
+
+                snap.forEach(d => complianceData.push(d.data()));
+                listDiv.innerHTML = '';
+
+                const filteredData = complianceData.filter(d => {
+                    if (filterType === 'all') return true;
+                    return (d.meterType || 'electric') === filterType;
+                });
+
+                if (filteredData.length === 0) {
+                    listDiv.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:40px;">No training data found for this meter type. Upload reference photos to get started.</p>';
+                    return;
+                }
+
+                filteredData.forEach(data => {
+                    const item = document.createElement('div');
+                    item.className = 'compliance-item';
+                    item.innerHTML = `
+                        <img src="${data.imageUrl}" alt="Reference" loading="lazy" />
+                        <div class="compliance-info">
+                            <span class="compliance-badge badge-${data.classification}">${data.classification}</span>
+                            ${data.annotationCount > 0 ? `<span style="font-size:0.75rem;color:var(--warning-yellow);display:block;margin-bottom:6px;">📍 ${data.annotationCount} marker${data.annotationCount>1?'s':''}</span>` : ''}
+                            <p class="compliance-notes">${data.notes}</p>
+                        </div>`;
+                    listDiv.appendChild(item);
+                });
+            } catch (error) {
+                document.getElementById('compliance-list').innerHTML =
+                    `<p style="text-align:center;color:var(--danger-red);padding:40px;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('compliance-modal').classList.remove('active');
+            document.getElementById('compliance-upload').value = '';
+            currentUploadedImage = currentClassification = baseImage = pendingMarker = null;
+            annotations = [];
+            parsedAnnotations = {};
+            if (annotationCtx) annotationCtx.clearRect(0, 0, annotationCanvas.width, annotationCanvas.height);
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    try {
+                        const b64 = reader.result.split(',')[1];
+                        if (!b64) throw new Error('Base64 extraction failed');
+                        resolve(b64);
+                    } catch (e) { reject(e); }
+                };
+                reader.onerror = () => reject(new Error('FileReader error'));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        window.testFirebase = async function() {
+            try {
+                const snap = await window.getDocs(window.collection(window.db, 'ComplianceMeterChecks'));
+                alert('Firebase OK! Found ' + snap.size + ' document(s).');
+            } catch (e) {
+                alert('Firebase test failed: ' + e.message);
+            }
+        };
+    </script>
+</body>
+</html>
