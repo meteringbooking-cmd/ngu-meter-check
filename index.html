@@ -132,30 +132,25 @@
             gap: 0;
             margin-bottom: 20px;
             border-bottom: 2px solid var(--border-color);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
         }
 
-        .tabs::-webkit-scrollbar { display: none; }
-
         .tab {
+            flex: 1;
             font-family: 'IBM Plex Mono', monospace;
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            padding: 14px 20px;
+            padding: 14px 10px;
             cursor: pointer;
-            font-size: clamp(0.75rem, 3vw, 0.95rem);
+            font-size: clamp(0.7rem, 2.5vw, 0.95rem);
             font-weight: 600;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
             transition: all 0.3s ease;
             position: relative;
             border-bottom: 3px solid transparent;
-            white-space: nowrap;
             min-height: var(--touch-min);
-            flex-shrink: 0;
+            text-align: center;
         }
 
         .tab:hover { color: var(--accent-bright); background: rgba(0, 180, 216, 0.05); }
