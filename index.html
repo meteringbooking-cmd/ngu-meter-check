@@ -537,21 +537,37 @@
 
     <canvas id="capture-canvas" class="hidden"></canvas>
 
-    <script>
-        // Tab Logic
-        function switchTab(tabId) {
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { getStorage, ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
+        // Initialize Firebase using the provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMmUOdW2uEIGVd6XQfWXKF8eaFmwEog1g",
+            authDomain: "oesperformance-a54c0.firebaseapp.com",
+            projectId: "oesperformance-a54c0",
+            storageBucket: "oesperformance-a54c0.firebasestorage.app"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Export functions to window object so inline event handlers work with type="module"
+        window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
             
             document.querySelectorAll(`[onclick="switchTab('${tabId}')"]`).forEach(btn => btn.classList.add('active'));
             document.getElementById(`${tabId}-view`).classList.add('active');
 
-            tabId === 'vetting' ? startCamera() : stopCamera();
-        }
+            tabId === 'vetting' ? window.startCamera() : window.stopCamera();
+        };
 
         // Camera Logic
         let currentStream = null;
-        async function startCamera() {
+        window.startCamera = async function() {
             const video = document.getElementById('video-stream');
             const container = document.getElementById('video-container');
             const controls = document.getElementById('camera-controls');
@@ -563,8 +579,11 @@
                 currentStream = stream;
                 container.style.display = 'block';
                 controls.innerHTML = `
-                    <button class="btn btn-primary" onclick="takePhoto()">Capture Photo</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse</button>
+                    <button class="btn btn-primary" onclick="takePhoto()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Capture Photo
+                    </button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse Device</button>
                     <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
                 `;
             } catch (err) {
@@ -572,55 +591,55 @@
                 controls.innerHTML = `
                     <div style="width:100%; text-align:center; padding:2rem; background:var(--bg-body); border-radius:var(--radius-md);">
                         <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem;">Live camera preview requires a secure connection. Tap below to use your device's native camera.</p>
-                        <button class="btn btn-primary btn-full" onclick="document.getElementById('fallback-upload').click()">Take Photo</button>
+                        <button class="btn btn-primary btn-full" onclick="document.getElementById('fallback-upload').click()">Take Photo / Browse</button>
                         <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
                     </div>
                 `;
             }
-        }
+        };
 
-        function stopCamera() {
+        window.stopCamera = function() {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
-        }
+        };
 
-        function takePhoto() {
+        window.takePhoto = function() {
             const video = document.getElementById('video-stream');
             const canvas = document.getElementById('capture-canvas');
             if (!video.srcObject) return;
             canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            showPreview(canvas.toDataURL('image/jpeg'));
-        }
+            window.showPreview(canvas.toDataURL('image/jpeg'));
+        };
 
-        function handleFallbackUpload(event) {
+        window.handleFallbackUpload = function(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = e => showPreview(e.target.result);
+                reader.onload = e => window.showPreview(e.target.result);
                 reader.readAsDataURL(file);
             }
-        }
+        };
 
-        function showPreview(url) {
-            stopCamera();
+        window.showPreview = function(url) {
+            window.stopCamera();
             document.getElementById('camera-interface').classList.add('hidden');
             document.getElementById('preview-interface').classList.remove('hidden');
             document.getElementById('photo-preview').src = url;
             document.getElementById('analysis-results').style.display = 'none';
-        }
+        };
 
-        function retakePhoto() {
+        window.retakePhoto = function() {
             document.getElementById('preview-interface').classList.add('hidden');
             document.getElementById('camera-interface').classList.remove('hidden');
             document.getElementById('analysis-results').style.display = 'none';
-            startCamera();
-        }
+            window.startCamera();
+        };
 
         // Analysis Logic
-        function analyzePhoto() {
+        window.analyzePhoto = function() {
             const btn = document.getElementById('analyze-btn');
             const effect = document.getElementById('scanning-effect');
             const line = document.getElementById('scanning-line');
@@ -632,11 +651,11 @@
             setTimeout(() => {
                 effect.style.display = 'none'; line.style.display = 'none';
                 btn.disabled = false; btn.innerText = 'Run AI Check';
-                renderResults(Math.random() > 0.4);
+                window.renderResults(Math.random() > 0.4);
             }, 2000);
-        }
+        };
 
-        function renderResults(isPass) {
+        window.renderResults = function(isPass) {
             const res = document.getElementById('analysis-results');
             if (isPass) {
                 res.innerHTML = `
@@ -668,7 +687,7 @@
                     </div>`;
             }
             res.style.display = 'block';
-        }
+        };
 
         // Training Canvas Logic
         const canvas = document.getElementById('drawing-canvas');
@@ -676,7 +695,7 @@
         const img = document.getElementById('training-image');
         let isDrawing = false, startX, startY, rects = [];
 
-        function handleTrainingUpload(e) {
+        window.handleTrainingUpload = function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -692,18 +711,18 @@
                         form.style.opacity = '1';
                         form.style.pointerEvents = 'auto';
                         
-                        resizeCanvas();
+                        window.resizeCanvas();
                     }
                 };
                 reader.readAsDataURL(file);
             }
-        }
+        };
 
-        function resizeCanvas() {
+        window.resizeCanvas = function() {
             canvas.width = img.clientWidth; canvas.height = img.clientHeight;
-            drawRects();
-        }
-        window.addEventListener('resize', () => { if(img.src) resizeCanvas(); });
+            window.drawRects();
+        };
+        window.addEventListener('resize', () => { if(img.src) window.resizeCanvas(); });
 
         function getPos(e) {
             const r = canvas.getBoundingClientRect();
@@ -723,7 +742,7 @@
             e.preventDefault();
             const pos = getPos(e);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRects();
+            window.drawRects();
             ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
             ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
             ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
@@ -743,49 +762,79 @@
                 rects = [{ x: startX, y: startY, w: pos.x - startX, h: pos.y - startY }];
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRects();
+            window.drawRects();
         }
 
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mouseleave', () => { isDrawing = false; drawRects(); });
+        canvas.addEventListener('mouseleave', () => { isDrawing = false; window.drawRects(); });
         canvas.addEventListener('touchstart', startDraw, {passive: false});
         canvas.addEventListener('touchmove', draw, {passive: false});
         canvas.addEventListener('touchend', endDraw);
 
-        function drawRects() {
+        window.drawRects = function() {
             ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([]);
             rects.forEach(r => {
                 ctx.strokeRect(r.x, r.y, r.w, r.h);
                 ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             });
-        }
+        };
 
-        function saveTrainingData() {
+        window.saveTrainingData = async function() {
             if (!rects.length) return alert("Please highlight an area on the image.");
-            if (!document.getElementById('issue-category').value) return alert("Select a category.");
+            const category = document.getElementById('issue-category').value;
+            const description = document.getElementById('issue-desc').value;
+            if (!category) return alert("Select a category.");
 
             const btn = document.getElementById('submit-training-btn');
             const og = btn.innerHTML;
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Syncing...`;
+            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Uploading to Firebase...`;
             btn.disabled = true;
 
-            // Simulate save
-            setTimeout(() => {
+            try {
+                // 1. Upload Image to Storage
+                const filename = \`ai_training/img_\${Date.now()}.jpg\`;
+                const storageReference = ref(storage, filename);
+                const uploadResult = await uploadString(storageReference, img.src, 'data_url');
+                const downloadURL = await getDownloadURL(uploadResult.ref);
+
+                // 2. Save data to Firestore 'AI metering' collection
+                await addDoc(collection(db, "AI metering"), {
+                    imageUrl: downloadURL,
+                    issueCategory: category,
+                    trainingContext: description,
+                    highlightBox: rects[0], // Coordinates for AI model
+                    imageDimensions: { width: canvas.width, height: canvas.height },
+                    createdAt: serverTimestamp()
+                });
+
                 btn.style.background = 'var(--success)';
-                btn.innerHTML = 'Data Saved!';
+                btn.innerHTML = 'Logged to Database!';
+                
                 setTimeout(() => {
-                    resetTraining();
+                    window.resetTraining();
                     btn.style.background = '';
                     btn.innerHTML = og;
                     btn.disabled = false;
-                }, 1500);
-            }, 1000);
-        }
+                }, 2000);
 
-        function resetTraining() {
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                alert("Error saving to Firebase. Please check the console or ensure your Firebase project allows unauthenticated uploads (Security Rules).");
+                btn.style.background = 'var(--danger)';
+                btn.innerHTML = 'Error saving';
+                
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.innerHTML = og;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        };
+
+        window.resetTraining = function() {
             document.getElementById('training-upload-area').style.display = 'block';
             document.getElementById('training-canvas-container').style.display = 'none';
             document.getElementById('drawing-hint').classList.add('hidden');
@@ -799,9 +848,9 @@
             document.getElementById('issue-desc').value = '';
             rects = [];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        };
 
-        document.addEventListener('DOMContentLoaded', startCamera);
+        document.addEventListener('DOMContentLoaded', window.startCamera);
     </script>
     <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 </body>
