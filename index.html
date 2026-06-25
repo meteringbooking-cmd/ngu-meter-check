@@ -9,22 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #f8fafc;
-            --bg-surface: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --border-light: #e2e8f0;
-            --border-focus: #cbd5e1;
-            --accent-color: #0f172a;
-            --accent-hover: #334155;
-            --blue-accent: #2563eb;
+            /* Premium Metallic Dark Theme */
+            --bg-body: #0d0d0f; /* Deep obsidian */
+            --bg-surface: linear-gradient(145deg, #222226, #18181b); /* Brushed metallic plate */
+            --text-primary: #f1f5f9; /* Silver */
+            --text-secondary: #94a3b8; /* Darker silver/grey */
+            --border-light: #333338;
+            --border-focus: #52525b;
+            --accent-color: linear-gradient(145deg, #3f3f46, #27272a); /* Metallic button */
+            --accent-hover: linear-gradient(145deg, #52525b, #3f3f46);
+            --blue-accent: linear-gradient(145deg, #3b82f6, #1d4ed8); /* Electric metallic blue */
+            --blue-hover: linear-gradient(145deg, #60a5fa, #2563eb);
             --success: #10b981;
             --danger: #ef4444;
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
-            --shadow-float: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
-            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+            --radius-lg: 12px; /* Sharper corners for industrial feel */
+            --radius-md: 8px;
+            --radius-sm: 4px;
+            --shadow-float: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Drop shadow + metallic highlight */
+            --shadow-subtle: 0 10px 15px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             --nav-height: 70px;
         }
 
@@ -38,6 +40,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
+            background-image: radial-gradient(circle at top right, #1a1a1f 0%, #0d0d0f 100%);
             color: var(--text-primary);
             line-height: 1.5;
             display: flex;
@@ -48,61 +51,72 @@
 
         /* Top Header */
         header {
-            background-color: var(--bg-surface);
+            background: linear-gradient(to right, #18181b, #131316);
             padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-light);
+            border-bottom: 1px solid #27272a;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             position: sticky;
             top: 0;
             z-index: 40;
         }
 
         .logo {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            letter-spacing: -0.5px;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            color: #e2e8f0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .logo-icon {
             width: 14px;
             height: 14px;
-            background-color: var(--blue-accent);
+            background: var(--blue-accent);
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
         }
 
         /* Desktop Navigation */
         .desktop-nav {
             display: flex;
             gap: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            padding: 0.25rem;
+            border-radius: 99px;
+            border: 1px solid #27272a;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .tab-btn {
             background: none;
             border: none;
-            padding: 0.6rem 1.2rem;
-            font-size: 0.9rem;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--text-secondary);
             cursor: pointer;
             border-radius: 99px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .tab-btn:hover {
             color: var(--text-primary);
-            background-color: var(--bg-body);
         }
 
         .tab-btn.active {
-            color: var(--bg-surface);
-            background-color: var(--text-primary);
+            color: #fff;
+            background: var(--accent-color);
+            box-shadow: var(--shadow-subtle);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
         /* Mobile Bottom Navigation */
@@ -112,10 +126,12 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border-light);
+            background: rgba(24, 24, 27, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #333338;
             z-index: 50;
             padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
         }
 
         .mobile-nav-inner {
@@ -141,7 +157,8 @@
         }
 
         .mobile-tab.active {
-            color: var(--blue-accent);
+            color: #60a5fa;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
         }
 
         .mobile-tab svg {
@@ -153,7 +170,7 @@
         /* Main Content Area */
         main {
             flex: 1;
-            padding: 2rem 1.5rem;
+            padding: 2.5rem 1.5rem;
             display: flex;
             justify-content: center;
             max-width: 1200px;
@@ -181,15 +198,29 @@
             background: var(--bg-surface);
             border-radius: var(--radius-lg);
             padding: 2.5rem;
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1px solid #3f3f46;
+            border-top-color: #52525b; /* Top highlight for metallic 3D effect */
             box-shadow: var(--shadow-float);
         }
 
         h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             margin-bottom: 0.5rem;
+            color: #f8fafc;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        h2::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, #3f3f46, transparent);
         }
 
         p.subtitle {
@@ -211,38 +242,51 @@
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
-            border: none;
-            letter-spacing: -0.2px;
+            border: 1px solid #3f3f46;
+            border-top-color: #52525b; /* Top shine */
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .btn-primary {
-            background-color: var(--accent-color);
+            background: var(--accent-color);
             color: #fff;
         }
 
         .btn-primary:hover:not(:disabled) {
-            background-color: var(--accent-hover);
+            background: var(--accent-hover);
             transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
         }
 
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
-            background-color: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--border-focus);
+            background: linear-gradient(145deg, #18181b, #121214);
+            color: var(--text-secondary);
         }
 
         .btn-secondary:hover {
-            background-color: var(--bg-body);
-            border-color: #94a3b8;
+            color: var(--text-primary);
+            background: linear-gradient(145deg, #27272a, #18181b);
         }
         
-        .btn-blue { background-color: var(--blue-accent); color: white; }
-        .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-blue { 
+            background: var(--blue-accent); 
+            color: white; 
+            border: 1px solid #1d4ed8;
+            border-top-color: #60a5fa;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .btn-blue:hover { 
+            background: var(--blue-hover); 
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
 
         .btn-full { width: 100%; }
 
@@ -252,11 +296,13 @@
             width: 100%;
             max-width: 700px;
             margin: 0 auto;
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             overflow: hidden;
             background-color: #000;
             aspect-ratio: 4/3;
-            box-shadow: var(--shadow-subtle);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #333338;
+            border-top-color: #52525b;
         }
 
         video, img.preview {
@@ -278,7 +324,7 @@
         .scan-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(37, 99, 235, 0) 0%, rgba(37, 99, 235, 0.15) 50%, rgba(37, 99, 235, 0) 100%);
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0) 0%, rgba(59, 130, 246, 0.2) 50%, rgba(59, 130, 246, 0) 100%);
             background-size: 100% 200%;
             animation: scanBg 2s ease-in-out infinite;
             display: none;
@@ -290,8 +336,8 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: var(--blue-accent);
-            box-shadow: 0 0 15px 2px var(--blue-accent);
+            background: #60a5fa;
+            box-shadow: 0 0 20px 4px #3b82f6;
             animation: scanLine 2s ease-in-out infinite;
             display: none;
         }
@@ -315,13 +361,17 @@
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             border-radius: 99px;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             font-weight: 600;
             margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
         }
         
-        .status-pass { background: #ecfdf5; color: #059669; }
-        .status-fail { background: #fef2f2; color: #dc2626; }
+        .status-pass { background: linear-gradient(145deg, #065f46, #047857); color: #a7f3d0; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .status-fail { background: linear-gradient(145deg, #991b1b, #b91c1c); color: #fecaca; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
         .issue-list {
             list-style: none;
@@ -333,10 +383,12 @@
             align-items: flex-start;
             gap: 1rem;
             padding: 1.25rem;
-            background: var(--bg-body);
+            background: linear-gradient(145deg, #18181b, #121214);
             border-radius: var(--radius-md);
             margin-bottom: 0.75rem;
-            border: 1px solid var(--border-light);
+            border: 1px solid #27272a;
+            border-top-color: #3f3f46;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         /* Training Layout */
@@ -348,51 +400,68 @@
         }
 
         .upload-zone {
-            border: 2px dashed var(--border-focus);
+            border: 2px dashed #3f3f46;
             border-radius: var(--radius-lg);
             padding: 4rem 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            background: var(--bg-body);
+            background: rgba(0,0,0,0.2);
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .upload-zone:hover {
-            border-color: var(--blue-accent);
-            background: #f1f5f9;
+            border-color: #60a5fa;
+            background: rgba(59, 130, 246, 0.05);
         }
 
         .canvas-wrapper {
             position: relative;
             width: 100%;
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             overflow: hidden;
             display: none;
-            border: 1px solid var(--border-light);
+            border: 2px solid #333338;
+            border-top-color: #52525b;
             background: #000;
-            touch-action: none; /* Prevent scroll while drawing */
+            touch-action: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .canvas-wrapper img { width: 100%; display: block; opacity: 0.9; }
+        .canvas-wrapper img { width: 100%; display: block; opacity: 0.85; filter: contrast(1.1); }
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
 
         /* Form styling */
         .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; color: var(--text-secondary); }
+        
         .form-control {
             width: 100%;
             padding: 0.875rem 1rem;
-            border: 1px solid var(--border-light);
+            border: 1px solid #3f3f46;
             border-radius: var(--radius-md);
             font-family: inherit;
             font-size: 0.95rem;
-            background: var(--bg-body);
+            background: #09090b; /* Very dark input */
             transition: all 0.2s;
             color: var(--text-primary);
             appearance: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
-        .form-control:focus { outline: none; border-color: var(--blue-accent); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        select.form-control { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto; }
+        
+        .form-control:focus { 
+            outline: none; 
+            border-color: #3b82f6; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 1px #3b82f6; 
+        }
+        
+        select.form-control { 
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: right 1rem top 50%; 
+            background-size: 0.65rem auto; 
+        }
+        
         textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.5; }
 
         .hidden { display: none !important; }
@@ -407,9 +476,9 @@
         @media (max-width: 600px) {
             .desktop-nav { display: none; }
             .mobile-nav { display: block; }
-            main { padding-bottom: 80px; /* Space for mobile nav */ }
+            main { padding-bottom: 80px; }
             header { padding: 1rem 1.5rem; }
-            h2 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
             .controls-row { flex-direction: column; }
             .btn { width: 100%; }
         }
@@ -478,8 +547,8 @@
                     <!-- Media Area -->
                     <div>
                         <div id="training-upload-area" class="upload-zone" onclick="document.getElementById('training-upload').click()">
-                            <svg style="width:40px;height:40px;color:#cbd5e1;margin-bottom:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <h3 style="font-size:1.1rem;margin-bottom:0.5rem;">Select Reference Image</h3>
+                            <svg style="width:40px;height:40px;color:#52525b;margin-bottom:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <h3 style="font-size:1.1rem;margin-bottom:0.5rem;color:#f1f5f9;">Select Reference Image</h3>
                             <p style="color:var(--text-secondary);font-size:0.85rem;">Tap or click to browse</p>
                             <input type="file" id="training-upload" accept="image/*" class="hidden" onchange="handleTrainingUpload(event)">
                         </div>
@@ -488,14 +557,14 @@
                             <img id="training-image" src="" alt="Reference">
                             <canvas id="drawing-canvas"></canvas>
                         </div>
-                        <p id="drawing-hint" class="hidden" style="margin-top:0.75rem;font-size:0.85rem;color:var(--blue-accent);text-align:center;">
+                        <p id="drawing-hint" class="hidden" style="margin-top:0.75rem;font-size:0.85rem;color:#60a5fa;text-align:center;">
                             Draw a box over the issue to highlight it.
                         </p>
                     </div>
 
                     <!-- Input Form -->
                     <div id="issue-form" style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-                        <h3 style="font-size:1.1rem; margin-bottom:1.5rem;">Log Issue Details</h3>
+                        <h3 style="font-size:1rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:1.5rem; color:#f1f5f9; border-bottom:1px solid #27272a; padding-bottom:0.5rem;">Log Issue Details</h3>
                         
                         <div class="form-group">
                             <label>Issue Category</label>
@@ -513,7 +582,7 @@
                             <textarea id="issue-desc" class="form-control" placeholder="Describe what the AI should identify in the highlighted region..."></textarea>
                         </div>
 
-                        <button class="btn btn-primary btn-full" id="submit-training-btn" onclick="saveTrainingData()">Submit to Model</button>
+                        <button class="btn btn-blue btn-full" id="submit-training-btn" onclick="saveTrainingData()">Submit to Model</button>
                         <button class="btn btn-secondary btn-full" style="margin-top:0.75rem;" onclick="resetTraining()">Clear & Restart</button>
                     </div>
                 </div>
@@ -589,7 +658,7 @@
             } catch (err) {
                 container.style.display = 'none';
                 controls.innerHTML = `
-                    <div style="width:100%; text-align:center; padding:2rem; background:var(--bg-body); border-radius:var(--radius-md);">
+                    <div style="width:100%; text-align:center; padding:2rem; background:rgba(0,0,0,0.2); border:1px solid #333338; border-radius:var(--radius-md);">
                         <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem;">Live camera preview requires a secure connection. Tap below to use your device's native camera.</p>
                         <button class="btn btn-primary btn-full" onclick="document.getElementById('fallback-upload').click()">Take Photo / Browse</button>
                         <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
@@ -659,25 +728,25 @@
             const res = document.getElementById('analysis-results');
             if (isPass) {
                 res.innerHTML = `
-                    <div style="background:var(--bg-body); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:1.5rem;">
+                    <div style="background:linear-gradient(145deg, #18181b, #121214); border:1px solid #27272a; border-top-color:#3f3f46; border-radius:var(--radius-md); padding:1.5rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
                         <span class="status-pill status-pass">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Compliance Verified
                         </span>
-                        <h4 style="margin-bottom:0.25rem;">Installation Looks Good</h4>
+                        <h4 style="margin-bottom:0.25rem; font-weight:500;">Installation Looks Good</h4>
                         <p style="color:var(--text-secondary);font-size:0.9rem;">No structural or safety issues detected by the model.</p>
                     </div>`;
             } else {
                 res.innerHTML = `
-                    <div style="background:var(--bg-body); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:1.5rem;">
+                    <div style="background:linear-gradient(145deg, #18181b, #121214); border:1px solid #27272a; border-top-color:#3f3f46; border-radius:var(--radius-md); padding:1.5rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
                         <span class="status-pill status-fail">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                             Review Required
                         </span>
-                        <h4 style="margin-bottom:1rem;">Potential Issues Flagged</h4>
+                        <h4 style="margin-bottom:1rem; font-weight:500;">Potential Issues Flagged</h4>
                         <ul class="issue-list">
                             <li class="issue-item">
-                                <div style="background:#fee2e2; width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;"></div>
+                                <div style="background:#ef4444; width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; box-shadow:0 0 8px #ef4444;"></div>
                                 <div>
                                     <strong style="display:block; font-size:0.9rem;">Exposed Wiring</strong>
                                     <span style="color:var(--text-secondary); font-size:0.85rem;">Detected near terminal block (92% confidence)</span>
@@ -706,7 +775,6 @@
                         document.getElementById('training-canvas-container').style.display = 'block';
                         document.getElementById('drawing-hint').classList.remove('hidden');
                         
-                        // Enable form
                         const form = document.getElementById('issue-form');
                         form.style.opacity = '1';
                         form.style.pointerEvents = 'auto';
@@ -743,16 +811,16 @@
             const pos = getPos(e);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             window.drawRects();
-            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
             ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+            ctx.fillStyle = 'rgba(96, 165, 250, 0.2)';
             ctx.fillRect(startX, startY, pos.x - startX, pos.y - startY);
         }
 
         function endDraw(e) {
             if (!isDrawing) return;
             isDrawing = false;
-            const pos = getPos(e.changedTouches ? e : e); // Handles touch end differently
+            const pos = getPos(e.changedTouches ? e : e);
             if (e.changedTouches) {
                 const r = canvas.getBoundingClientRect();
                 pos.x = e.changedTouches[0].clientX - r.left;
@@ -774,10 +842,10 @@
         canvas.addEventListener('touchend', endDraw);
 
         window.drawRects = function() {
-            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([]);
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([]);
             rects.forEach(r => {
                 ctx.strokeRect(r.x, r.y, r.w, r.h);
-                ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             });
         };
@@ -790,7 +858,7 @@
 
             const btn = document.getElementById('submit-training-btn');
             const og = btn.innerHTML;
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Uploading to Firebase...`;
+            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Uploading...`;
             btn.disabled = true;
 
             try {
@@ -810,7 +878,7 @@
                     createdAt: serverTimestamp()
                 });
 
-                btn.style.background = 'var(--success)';
+                btn.style.background = 'linear-gradient(145deg, #059669, #047857)';
                 btn.innerHTML = 'Logged to Database!';
                 
                 setTimeout(() => {
@@ -823,7 +891,7 @@
             } catch (error) {
                 console.error("Firebase Error:", error);
                 alert("Error saving to Firebase. Please check the console or ensure your Firebase project allows unauthenticated uploads (Security Rules).");
-                btn.style.background = 'var(--danger)';
+                btn.style.background = 'linear-gradient(145deg, #dc2626, #b91c1c)';
                 btn.innerHTML = 'Error saving';
                 
                 setTimeout(() => {
