@@ -385,7 +385,7 @@ Training Knowledge Base:
 ${knowledgeBase}`;
 
             // 4. Call Claude API
-            const response = await fetch("https://corsproxy.io/?https://api.anthropic.com/v1/messages", {
+            const response = await fetch("https://cors-anywhere.herokuapp.com/https://api.anthropic.com/v1/messages", {
                 method: "POST",
                 headers: {
                     "x-api-key": apiKey,
@@ -410,8 +410,12 @@ ${knowledgeBase}`;
             });
 
             if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error?.message || "API Request Failed");
+                if (response.status === 403 && response.url.includes("cors-anywhere")) {
+                    throw new Error("CORS Proxy Locked. Please open https://cors-anywhere.herokuapp.com/corsdemo in a new tab, click 'Request temporary access', and then try again.");
+                }
+                let errMsg = "API Request Failed";
+                try { const err = await response.json(); errMsg = err.error?.message || errMsg; } catch(e){}
+                throw new Error(errMsg);
             }
 
             const data = await response.json();
