@@ -298,18 +298,27 @@
             margin: 0 auto;
             border-radius: var(--radius-md);
             overflow: hidden;
-            background-color: #000;
+            background-color: #050505;
             aspect-ratio: 4/3;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
             border: 2px solid #333338;
             border-top-color: #52525b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #52525b;
         }
 
-        video, img.preview {
+        .camera-wrapper img.preview {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* Contain to show full image */
             display: block;
+            background: #000;
         }
 
         .controls-row {
@@ -504,18 +513,26 @@
                 <h2>Installation Check</h2>
                 <p class="subtitle">Capture an image of the meter setup to automatically run it against our compliance models.</p>
                 
-                <!-- Camera Section -->
+                <!-- Camera Section (Native file inputs for 100% mobile compatibility) -->
                 <div id="camera-interface">
-                    <div class="camera-wrapper" id="video-container">
-                        <video id="video-stream" autoplay playsinline></video>
+                    <div class="camera-wrapper">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.3; margin-bottom:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span style="font-size:0.9rem; letter-spacing:0.5px;">AWAITING IMAGE INPUT</span>
                     </div>
-                    <div class="controls-row" id="camera-controls">
-                        <button class="btn btn-primary" onclick="takePhoto()">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            Capture Photo
+                    <div class="controls-row">
+                        <!-- Capture Environment automatically opens the camera on mobile! -->
+                        <button class="btn btn-primary" onclick="document.getElementById('native-camera-upload').click()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            Take Photo
                         </button>
-                        <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse Device</button>
-                        <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
+                        <input type="file" id="native-camera-upload" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelected(event)">
+                        
+                        <!-- Standard file input opens the gallery/files on mobile -->
+                        <button class="btn btn-secondary" onclick="document.getElementById('native-gallery-upload').click()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Upload Image
+                        </button>
+                        <input type="file" id="native-gallery-upload" accept="image/*" class="hidden" onchange="handleImageSelected(event)">
                     </div>
                 </div>
 
@@ -527,7 +544,7 @@
                         <div id="scanning-line" class="scan-line"></div>
                     </div>
                     <div class="controls-row" id="preview-controls">
-                        <button class="btn btn-secondary" onclick="retakePhoto()">Retake</button>
+                        <button class="btn btn-secondary" onclick="resetVetting()">Clear</button>
                         <button id="analyze-btn" class="btn btn-blue" onclick="analyzePhoto()">Run AI Check</button>
                     </div>
                 </div>
@@ -604,9 +621,7 @@
         </div>
     </nav>
 
-    <canvas id="capture-canvas" class="hidden"></canvas>
-
-    <!-- Firebase Compat SDKs -->
+    <!-- Firebase Compat SDKs to avoid CORS / Module issues on local file:// -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
@@ -629,80 +644,31 @@
             
             document.querySelectorAll(`[onclick="switchTab('${tabId}')"]`).forEach(btn => btn.classList.add('active'));
             document.getElementById(`${tabId}-view`).classList.add('active');
-
-            tabId === 'vetting' ? startCamera() : stopCamera();
         }
 
-        let currentStream = null;
-        async function startCamera() {
-            const video = document.getElementById('video-stream');
-            const container = document.getElementById('video-container');
-            const controls = document.getElementById('camera-controls');
-            
-            try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("API not supported");
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                video.srcObject = stream;
-                currentStream = stream;
-                container.style.display = 'block';
-                controls.innerHTML = `
-                    <button class="btn btn-primary" onclick="takePhoto()">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Capture Photo
-                    </button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse Device</button>
-                    <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
-                `;
-            } catch (err) {
-                container.style.display = 'none';
-                controls.innerHTML = `
-                    <div style="width:100%; text-align:center; padding:2rem; background:rgba(0,0,0,0.2); border:1px solid #333338; border-radius:var(--radius-md);">
-                        <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem;">Live camera preview requires a secure connection. Tap below to use your device's native camera.</p>
-                        <button class="btn btn-primary btn-full" onclick="document.getElementById('fallback-upload').click()">Take Photo / Browse</button>
-                        <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
-                    </div>
-                `;
-            }
-        }
-
-        function stopCamera() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-        }
-
-        function takePhoto() {
-            const video = document.getElementById('video-stream');
-            const canvas = document.getElementById('capture-canvas');
-            if (!video.srcObject) return;
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            showPreview(canvas.toDataURL('image/jpeg'));
-        }
-
-        function handleFallbackUpload(event) {
+        function handleImageSelected(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = e => showPreview(e.target.result);
                 reader.readAsDataURL(file);
             }
+            // Clear input so the same file can be selected again
+            event.target.value = '';
         }
 
         function showPreview(url) {
-            stopCamera();
             document.getElementById('camera-interface').classList.add('hidden');
             document.getElementById('preview-interface').classList.remove('hidden');
             document.getElementById('photo-preview').src = url;
             document.getElementById('analysis-results').style.display = 'none';
         }
 
-        function retakePhoto() {
+        function resetVetting() {
             document.getElementById('preview-interface').classList.add('hidden');
             document.getElementById('camera-interface').classList.remove('hidden');
             document.getElementById('analysis-results').style.display = 'none';
-            startCamera();
+            document.getElementById('photo-preview').src = '';
         }
 
         function analyzePhoto() {
@@ -755,6 +721,7 @@
             res.style.display = 'block';
         }
 
+        // Training Canvas Logic
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d');
         const img = document.getElementById('training-image');
@@ -780,6 +747,7 @@
                 };
                 reader.readAsDataURL(file);
             }
+            e.target.value = ''; // Reset input
         }
 
         function resizeCanvas() {
@@ -913,8 +881,6 @@
             rects = [];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-
-        document.addEventListener('DOMContentLoaded', startCamera);
     </script>
     <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 </body>
