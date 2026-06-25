@@ -2,447 +2,417 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Compliance Vetting Tool</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0f172a;
-            --accent-color: #2563eb;
-            --accent-hover: #1d4ed8;
-            --success-color: #059669;
-            --danger-color: #dc2626;
-            --bg-color: #f8fafc;
-            --surface-color: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --radius: 8px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-light: #e2e8f0;
+            --border-focus: #cbd5e1;
+            --accent-color: #0f172a;
+            --accent-hover: #334155;
+            --blue-accent: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-float: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+            --nav-height: 70px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
             line-height: 1.5;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Header */
+        /* Top Header */
         header {
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            background-color: var(--bg-surface);
+            padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-sm);
-            z-index: 10;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 40;
         }
 
         .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .logo-icon {
-            width: 24px;
-            height: 24px;
-            background-color: var(--accent-color);
-            border-radius: 4px;
+            width: 14px;
+            height: 14px;
+            background-color: var(--blue-accent);
+            border-radius: 50%;
             display: inline-block;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
         }
 
-        .nav-tabs {
+        /* Desktop Navigation */
+        .desktop-nav {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .tab-btn {
             background: none;
             border: none;
-            padding: 0.5rem 1rem;
-            font-size: 0.95rem;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             cursor: pointer;
-            border-radius: var(--radius);
-            transition: all 0.2s ease;
+            border-radius: 99px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .tab-btn:hover {
-            color: var(--text-main);
-            background-color: var(--bg-color);
+            color: var(--text-primary);
+            background-color: var(--bg-body);
         }
 
         .tab-btn.active {
-            color: #fff;
-            background-color: var(--primary-color);
+            color: var(--bg-surface);
+            background-color: var(--text-primary);
         }
 
-        /* Main Layout */
+        /* Mobile Bottom Navigation */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-light);
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .mobile-nav-inner {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem;
+        }
+
+        .mobile-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            gap: 0.25rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .mobile-tab.active {
+            color: var(--blue-accent);
+        }
+
+        .mobile-tab svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        /* Main Content Area */
         main {
             flex: 1;
-            padding: 2rem;
+            padding: 2rem 1.5rem;
             display: flex;
             justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .view-section {
             display: none;
             width: 100%;
-            max-width: 1000px;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .view-section.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Common Components */
-        .card {
-            background: var(--surface-color);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
-            padding: 2rem;
-            border: 1px solid var(--border-color);
+        /* UI Components */
+        .sleek-card {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: var(--shadow-float);
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
             margin-bottom: 0.5rem;
-            color: var(--primary-color);
         }
 
         p.subtitle {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            letter-spacing: -0.2px;
         }
 
         .btn-primary {
             background-color: var(--accent-color);
             color: #fff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 1rem;
         }
 
         .btn-primary:hover:not(:disabled) {
             background-color: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
         .btn-primary:disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
         .btn-secondary {
-            background-color: var(--surface-color);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 1rem;
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-focus);
         }
 
         .btn-secondary:hover {
-            background-color: var(--bg-color);
-            border-color: #cbd5e1;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            background-color: var(--bg-body);
+            border-color: #94a3b8;
         }
         
-        .btn-danger:hover {
-            background-color: #b91c1c;
-        }
+        .btn-blue { background-color: var(--blue-accent); color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
 
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+        .btn-full { width: 100%; }
 
-        /* Vetting View Specifics */
-        .camera-container {
+        /* Vetting Camera specific */
+        .camera-wrapper {
             position: relative;
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             background-color: #000;
             aspect-ratio: 4/3;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-subtle);
         }
 
-        video {
+        video, img.preview {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
         }
 
-        .camera-controls {
+        .controls-row {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
             gap: 1rem;
             margin-top: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        #photo-preview-container {
-            display: none;
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            background-color: #f1f5f9;
-        }
-
-        #photo-preview {
-            width: 100%;
-            display: block;
-        }
-
-        .scanning-overlay {
+        /* Scanning effect */
+        .scan-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.4) 50%, rgba(37, 99, 235, 0.1) 100%);
+            inset: 0;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0) 0%, rgba(37, 99, 235, 0.15) 50%, rgba(37, 99, 235, 0) 100%);
             background-size: 100% 200%;
-            animation: scan 2s linear infinite;
+            animation: scanBg 2s ease-in-out infinite;
             display: none;
             pointer-events: none;
-            border: 2px solid var(--accent-color);
         }
 
-        @keyframes scan {
-            0% { background-position: 0% -100%; }
-            100% { background-position: 0% 200%; }
-        }
-        
-        .scanning-line {
+        .scan-line {
             position: absolute;
-            top: 0;
             left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-color);
-            animation: scanLine 2s linear infinite;
+            right: 0;
+            height: 2px;
+            background: var(--blue-accent);
+            box-shadow: 0 0 15px 2px var(--blue-accent);
+            animation: scanLine 2s ease-in-out infinite;
             display: none;
         }
 
-        @keyframes scanLine {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
-        }
+        @keyframes scanBg { 0% { background-position: 0 -100%; } 100% { background-position: 0 200%; } }
+        @keyframes scanLine { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        #analysis-results {
+        /* Results Display */
+        .result-box {
             margin-top: 2rem;
             display: none;
-            animation: fadeIn 0.4s ease-in-out;
+            animation: slideUp 0.3s ease;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .result-banner {
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            display: flex;
+        .status-pill {
+            display: inline-flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .result-banner.pass {
-            background-color: #ecfdf5;
-            border: 1px solid #10b981;
-            color: #065f46;
-        }
-
-        .result-banner.fail {
-            background-color: #fef2f2;
-            border: 1px solid #ef4444;
-            color: #991b1b;
-        }
-        
-        .result-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        
-        .pass .result-icon { background-color: var(--success-color); }
-        .fail .result-icon { background-color: var(--danger-color); }
-
-        /* Training View Specifics */
-        .training-layout {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-            align-items: start;
-        }
-
-        @media (max-width: 900px) {
-            .training-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: var(--radius);
-            padding: 3rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: var(--bg-color);
-        }
-
-        .upload-area:hover {
-            border-color: var(--accent-color);
-            background-color: #f1f5f9;
-        }
-
-        .canvas-container {
-            position: relative;
-            width: 100%;
-            border-radius: var(--radius);
-            overflow: hidden;
-            display: none;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-            cursor: crosshair;
-            background-color: #f1f5f9;
-        }
-
-        .canvas-container img {
-            width: 100%;
-            display: block;
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .status-badge {
-            display: inline-block;
+            gap: 0.5rem;
             padding: 0.5rem 1rem;
-            border-radius: 9999px;
+            border-radius: 99px;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .status-pass { background: #ecfdf5; color: #059669; }
+        .status-fail { background: #fef2f2; color: #dc2626; }
+
+        .issue-list {
+            list-style: none;
             margin-top: 1rem;
         }
         
-        .badge-info {
-            background-color: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
+        .issue-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border-light);
         }
-        
-        /* Utility */
+
+        /* Training Layout */
+        .training-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-focus);
+            border-radius: var(--radius-lg);
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-body);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--blue-accent);
+            background: #f1f5f9;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: none;
+            border: 1px solid var(--border-light);
+            background: #000;
+            touch-action: none; /* Prevent scroll while drawing */
+        }
+
+        .canvas-wrapper img { width: 100%; display: block; opacity: 0.9; }
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+
+        /* Form styling */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: var(--bg-body);
+            transition: all 0.2s;
+            color: var(--text-primary);
+            appearance: none;
+        }
+        .form-control:focus { outline: none; border-color: var(--blue-accent); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        select.form-control { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto; }
+        textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.5; }
+
         .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mt-2 { margin-top: 0.5rem; }
-        
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .training-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .sleek-card { padding: 1.5rem; }
+            main { padding: 1rem; }
+        }
+
+        @media (max-width: 600px) {
+            .desktop-nav { display: none; }
+            .mobile-nav { display: block; }
+            main { padding-bottom: 80px; /* Space for mobile nav */ }
+            header { padding: 1rem 1.5rem; }
+            h2 { font-size: 1.5rem; }
+            .controls-row { flex-direction: column; }
+            .btn { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -452,162 +422,157 @@
             <span class="logo-icon"></span>
             ComplianceAI
         </div>
-        <div class="nav-tabs">
+        <div class="desktop-nav">
             <button class="tab-btn active" onclick="switchTab('vetting')">Vetting Tool</button>
             <button class="tab-btn" onclick="switchTab('training')">Training Center</button>
         </div>
     </header>
 
     <main>
-        <!-- Vetting Tool View -->
+        <!-- Vetting View -->
         <section id="vetting-view" class="view-section active">
-            <div class="card">
+            <div class="sleek-card">
                 <h2>Installation Check</h2>
-                <p class="subtitle">Capture a photo of the meter installation for automated AI compliance vetting.</p>
+                <p class="subtitle">Capture an image of the meter setup to automatically run it against our compliance models.</p>
                 
-                <!-- Camera Interface -->
+                <!-- Camera Section -->
                 <div id="camera-interface">
-                    <div class="camera-container" id="video-container">
+                    <div class="camera-wrapper" id="video-container">
                         <video id="video-stream" autoplay playsinline></video>
                     </div>
-                    <div class="camera-controls" id="camera-controls-wrapper">
-                        <button class="btn-primary" onclick="takePhoto()">
-                            <svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <div class="controls-row" id="camera-controls">
+                        <button class="btn btn-primary" onclick="takePhoto()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             Capture Photo
                         </button>
-                        <button class="btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse Files</button>
-                        <!-- Mobile optimized native camera / file upload -->
+                        <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse Device</button>
                         <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
                     </div>
                 </div>
 
-                <!-- Processing / Preview Interface -->
-                <div id="photo-preview-container">
-                    <img id="photo-preview" src="" alt="Captured Installation">
-                    <div id="scanning-effect" class="scanning-overlay"></div>
-                    <div id="scanning-line" class="scanning-line"></div>
+                <!-- Preview Section -->
+                <div id="preview-interface" class="hidden">
+                    <div class="camera-wrapper">
+                        <img id="photo-preview" class="preview" src="" alt="Captured">
+                        <div id="scanning-effect" class="scan-overlay"></div>
+                        <div id="scanning-line" class="scan-line"></div>
+                    </div>
+                    <div class="controls-row" id="preview-controls">
+                        <button class="btn btn-secondary" onclick="retakePhoto()">Retake</button>
+                        <button id="analyze-btn" class="btn btn-blue" onclick="analyzePhoto()">Run AI Check</button>
+                    </div>
                 </div>
 
-                <div id="preview-controls" class="camera-controls hidden">
-                    <button class="btn-secondary" onclick="retakePhoto()">Retake Photo</button>
-                    <button id="analyze-btn" class="btn-primary" onclick="analyzePhoto()">Run AI Check</button>
-                </div>
-
-                <!-- Analysis Results -->
-                <div id="analysis-results">
-                    <!-- Dynamic Content inserted via JS -->
-                </div>
+                <!-- Results -->
+                <div id="analysis-results" class="result-box"></div>
             </div>
         </section>
 
-        <!-- Training Center View -->
+        <!-- Training View -->
         <section id="training-view" class="view-section">
-            <div class="card">
-                <h2>AI Compliance Training</h2>
-                <p class="subtitle">Upload historical installation images and highlight non-compliant areas to train the custom AI model.</p>
+            <div class="sleek-card">
+                <h2>AI Model Training</h2>
+                <p class="subtitle">Upload historical images and highlight non-compliant areas. This data will be used to refine and train custom compliance models.</p>
                 
-                <div class="training-layout">
-                    <!-- Left: Image & Canvas -->
-                    <div class="training-editor">
-                        <div id="training-upload-area" class="upload-area" onclick="document.getElementById('training-upload').click()">
-                            <svg style="width:48px;height:48px;color:#94a3b8;margin-bottom:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                            </svg>
-                            <h3 style="margin-bottom:0.5rem;color:var(--text-main);">Select Reference Image</h3>
-                            <p style="color:var(--text-muted);font-size:0.9rem;">PNG, JPG accepted</p>
+                <div class="training-grid">
+                    <!-- Media Area -->
+                    <div>
+                        <div id="training-upload-area" class="upload-zone" onclick="document.getElementById('training-upload').click()">
+                            <svg style="width:40px;height:40px;color:#cbd5e1;margin-bottom:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <h3 style="font-size:1.1rem;margin-bottom:0.5rem;">Select Reference Image</h3>
+                            <p style="color:var(--text-secondary);font-size:0.85rem;">Tap or click to browse</p>
                             <input type="file" id="training-upload" accept="image/*" class="hidden" onchange="handleTrainingUpload(event)">
                         </div>
 
-                        <div id="training-canvas-container" class="canvas-container">
-                            <img id="training-image" src="" alt="Training Reference">
+                        <div id="training-canvas-container" class="canvas-wrapper">
+                            <img id="training-image" src="" alt="Reference">
                             <canvas id="drawing-canvas"></canvas>
                         </div>
-                        <div id="drawing-hint" class="hidden status-badge badge-info">
-                            Tip: Click and drag on the image to highlight a specific issue for the AI.
-                        </div>
+                        <p id="drawing-hint" class="hidden" style="margin-top:0.75rem;font-size:0.85rem;color:var(--blue-accent);text-align:center;">
+                            Draw a box over the issue to highlight it.
+                        </p>
                     </div>
 
-                    <!-- Right: Form -->
-                    <div class="training-form">
-                        <div id="issue-form" class="hidden">
-                            <h3 style="margin-bottom:1.5rem;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Log Compliance Issue</h3>
-                            
-                            <div class="form-group">
-                                <label for="issue-category">Issue Category</label>
-                                <select id="issue-category" class="form-control">
-                                    <option value="">Select a category...</option>
-                                    <option value="wiring">Incorrect Wiring / Termination</option>
-                                    <option value="clearance">Insufficient Clearance</option>
-                                    <option value="seal">Missing / Broken Security Seal</option>
-                                    <option value="damage">Physical Damage to Equipment</option>
-                                    <option value="other">Other Violation</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="issue-desc">Training Description</label>
-                                <textarea id="issue-desc" class="form-control" placeholder="Describe exactly what the AI should look for in the highlighted area..."></textarea>
-                            </div>
-
-                            <button class="btn-primary" style="width:100%" onclick="saveTrainingData()">Submit to Model</button>
-                            <button class="btn-secondary" style="width:100%;margin-top:0.5rem;" onclick="resetTraining()">Clear & Restart</button>
-                        </div>
+                    <!-- Input Form -->
+                    <div id="issue-form" style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
+                        <h3 style="font-size:1.1rem; margin-bottom:1.5rem;">Log Issue Details</h3>
                         
-                        <div id="no-image-msg" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);border:1px solid var(--border-color);border-radius:var(--radius);background:var(--bg-color);">
-                            Upload an image to start tagging specific issues for AI training.
+                        <div class="form-group">
+                            <label>Issue Category</label>
+                            <select id="issue-category" class="form-control">
+                                <option value="">Select a category...</option>
+                                <option value="wiring">Incorrect Wiring / Termination</option>
+                                <option value="clearance">Insufficient Clearance</option>
+                                <option value="seal">Missing / Broken Security Seal</option>
+                                <option value="other">Other Violation</option>
+                            </select>
                         </div>
+
+                        <div class="form-group">
+                            <label>Training Context</label>
+                            <textarea id="issue-desc" class="form-control" placeholder="Describe what the AI should identify in the highlighted region..."></textarea>
+                        </div>
+
+                        <button class="btn btn-primary btn-full" id="submit-training-btn" onclick="saveTrainingData()">Submit to Model</button>
+                        <button class="btn btn-secondary btn-full" style="margin-top:0.75rem;" onclick="resetTraining()">Clear & Restart</button>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Hidden Canvas for taking photos from live stream -->
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-inner">
+            <button class="mobile-tab active" onclick="switchTab('vetting')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                Vetting
+            </button>
+            <button class="mobile-tab" onclick="switchTab('training')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Training
+            </button>
+        </div>
+    </nav>
+
     <canvas id="capture-canvas" class="hidden"></canvas>
 
     <script>
-        // --- State Management ---
-        let currentStream = null;
-
-        // --- Navigation ---
+        // Tab Logic
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
             
-            document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.querySelectorAll(`[onclick="switchTab('${tabId}')"]`).forEach(btn => btn.classList.add('active'));
             document.getElementById(`${tabId}-view`).classList.add('active');
 
-            if (tabId === 'vetting') {
-                startCamera();
-            } else {
-                stopCamera();
-            }
+            tabId === 'vetting' ? startCamera() : stopCamera();
         }
 
-        // --- Vetting Tool (Camera Logic) ---
+        // Camera Logic
+        let currentStream = null;
         async function startCamera() {
             const video = document.getElementById('video-stream');
             const container = document.getElementById('video-container');
-            const controlsWrapper = document.getElementById('camera-controls-wrapper');
+            const controls = document.getElementById('camera-controls');
             
             try {
-                // Check if API exists (it might not on file:// protocol in some browsers)
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error("Camera API not supported or requires secure context (HTTPS).");
-                }
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' }
-                });
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("API not supported");
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
                 currentStream = stream;
+                container.style.display = 'block';
+                controls.innerHTML = `
+                    <button class="btn btn-primary" onclick="takePhoto()">Capture Photo</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fallback-upload').click()">Browse</button>
+                    <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
+                `;
             } catch (err) {
-                console.warn("Camera access fallback triggered:", err.message);
-                // Graceful fallback for local files / blocked permissions
                 container.style.display = 'none';
-                controlsWrapper.innerHTML = `
-                    <div style="width: 100%; text-align: center; padding: 2rem; border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc;">
-                        <p style="margin-bottom: 1rem; color: #64748b;">Live camera feed unavailable. You can take a photo directly using your device's native camera.</p>
-                        <button class="btn-primary" onclick="document.getElementById('fallback-upload').click()">Take Photo / Upload</button>
+                controls.innerHTML = `
+                    <div style="width:100%; text-align:center; padding:2rem; background:var(--bg-body); border-radius:var(--radius-md);">
+                        <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem;">Live camera preview requires a secure connection. Tap below to use your device's native camera.</p>
+                        <button class="btn btn-primary btn-full" onclick="document.getElementById('fallback-upload').click()">Take Photo</button>
                         <input type="file" id="fallback-upload" accept="image/*" capture="environment" class="hidden" onchange="handleFallbackUpload(event)">
                     </div>
                 `;
@@ -624,132 +589,108 @@
         function takePhoto() {
             const video = document.getElementById('video-stream');
             const canvas = document.getElementById('capture-canvas');
-            
             if (!video.srcObject) return;
-
-            // Set canvas dimensions to match video
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Draw video frame to canvas
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            
-            // Convert to image
-            const imageUrl = canvas.toDataURL('image/jpeg');
-            showPreview(imageUrl);
+            showPreview(canvas.toDataURL('image/jpeg'));
         }
 
         function handleFallbackUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => showPreview(e.target.result);
+                reader.onload = e => showPreview(e.target.result);
                 reader.readAsDataURL(file);
             }
         }
 
-        function showPreview(imageUrl) {
+        function showPreview(url) {
             stopCamera();
             document.getElementById('camera-interface').classList.add('hidden');
-            document.getElementById('photo-preview-container').style.display = 'block';
-            document.getElementById('photo-preview').src = imageUrl;
-            document.getElementById('preview-controls').classList.remove('hidden');
+            document.getElementById('preview-interface').classList.remove('hidden');
+            document.getElementById('photo-preview').src = url;
             document.getElementById('analysis-results').style.display = 'none';
         }
 
         function retakePhoto() {
-            document.getElementById('photo-preview-container').style.display = 'none';
-            document.getElementById('preview-controls').classList.add('hidden');
+            document.getElementById('preview-interface').classList.add('hidden');
             document.getElementById('camera-interface').classList.remove('hidden');
             document.getElementById('analysis-results').style.display = 'none';
-            startCamera(); // Restart stream
+            startCamera();
         }
 
-        // --- Mock AI Analysis ---
+        // Analysis Logic
         function analyzePhoto() {
             const btn = document.getElementById('analyze-btn');
-            const overlay = document.getElementById('scanning-effect');
+            const effect = document.getElementById('scanning-effect');
             const line = document.getElementById('scanning-line');
-            const resultsDiv = document.getElementById('analysis-results');
+            const res = document.getElementById('analysis-results');
 
-            btn.disabled = true;
-            btn.innerText = 'Analyzing Data...';
-            overlay.style.display = 'block';
-            line.style.display = 'block';
-            resultsDiv.style.display = 'none';
+            btn.disabled = true; btn.innerText = 'Analyzing...';
+            effect.style.display = 'block'; line.style.display = 'block'; res.style.display = 'none';
 
-            // Simulate AI processing delay
             setTimeout(() => {
-                overlay.style.display = 'none';
-                line.style.display = 'none';
-                btn.disabled = false;
-                btn.innerText = 'Run AI Check';
-                
-                // Randomly mock a pass or fail for demonstration
-                const isPass = Math.random() > 0.4;
-                renderResults(isPass);
-            }, 2500);
+                effect.style.display = 'none'; line.style.display = 'none';
+                btn.disabled = false; btn.innerText = 'Run AI Check';
+                renderResults(Math.random() > 0.4);
+            }, 2000);
         }
 
         function renderResults(isPass) {
-            const resultsDiv = document.getElementById('analysis-results');
-            
+            const res = document.getElementById('analysis-results');
             if (isPass) {
-                resultsDiv.innerHTML = `
-                    <div class="result-banner pass">
-                        <div class="result-icon">✓</div>
-                        <div>
-                            <h3 style="margin-bottom:0.25rem;">Compliance Check Passed</h3>
-                            <p style="font-size:0.95rem; margin:0;">No structural or safety issues detected in this configuration.</p>
-                        </div>
-                    </div>
-                `;
+                res.innerHTML = `
+                    <div style="background:var(--bg-body); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:1.5rem;">
+                        <span class="status-pill status-pass">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Compliance Verified
+                        </span>
+                        <h4 style="margin-bottom:0.25rem;">Installation Looks Good</h4>
+                        <p style="color:var(--text-secondary);font-size:0.9rem;">No structural or safety issues detected by the model.</p>
+                    </div>`;
             } else {
-                resultsDiv.innerHTML = `
-                    <div class="result-banner fail">
-                        <div class="result-icon">!</div>
-                        <div>
-                            <h3 style="margin-bottom:0.25rem;">Compliance Violation Detected</h3>
-                            <p style="font-size:0.95rem; margin:0;">The AI model flagged potential issues requiring manual review.</p>
-                        </div>
-                    </div>
-                    <div style="background:var(--surface-color);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;">
-                        <h4 style="margin-bottom:1rem;color:var(--text-main);">Identified Concerns:</h4>
-                        <ul style="list-style-position:inside;color:var(--danger-color);font-size:0.95rem;margin-bottom:1.5rem;">
-                            <li style="margin-bottom:0.5rem;">Potential wiring exposure near the main terminal block. <span style="color:var(--text-muted);">(Confidence: 87%)</span></li>
-                            <li>Security seal appears missing or compromised. <span style="color:var(--text-muted);">(Confidence: 92%)</span></li>
+                res.innerHTML = `
+                    <div style="background:var(--bg-body); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:1.5rem;">
+                        <span class="status-pill status-fail">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Review Required
+                        </span>
+                        <h4 style="margin-bottom:1rem;">Potential Issues Flagged</h4>
+                        <ul class="issue-list">
+                            <li class="issue-item">
+                                <div style="background:#fee2e2; width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;"></div>
+                                <div>
+                                    <strong style="display:block; font-size:0.9rem;">Exposed Wiring</strong>
+                                    <span style="color:var(--text-secondary); font-size:0.85rem;">Detected near terminal block (92% confidence)</span>
+                                </div>
+                            </li>
                         </ul>
-                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                            <button class="btn-secondary" onclick="retakePhoto()">Fix Issue & Retake</button>
-                            <button class="btn-danger">Override Alert</button>
-                        </div>
-                    </div>
-                `;
+                    </div>`;
             }
-            resultsDiv.style.display = 'block';
+            res.style.display = 'block';
         }
 
-        // --- Training Tool (Canvas Drawing Logic) ---
+        // Training Canvas Logic
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d');
-        const imgElement = document.getElementById('training-image');
-        
-        let isDrawing = false;
-        let startX, startY;
-        let rects = []; // Store drawn rectangles
+        const img = document.getElementById('training-image');
+        let isDrawing = false, startX, startY, rects = [];
 
-        function handleTrainingUpload(event) {
-            const file = event.target.files[0];
+        function handleTrainingUpload(e) {
+            const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    imgElement.src = e.target.result;
-                    imgElement.onload = () => {
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    img.onload = () => {
                         document.getElementById('training-upload-area').style.display = 'none';
                         document.getElementById('training-canvas-container').style.display = 'block';
-                        document.getElementById('no-image-msg').style.display = 'none';
-                        document.getElementById('issue-form').classList.remove('hidden');
                         document.getElementById('drawing-hint').classList.remove('hidden');
+                        
+                        // Enable form
+                        const form = document.getElementById('issue-form');
+                        form.style.opacity = '1';
+                        form.style.pointerEvents = 'auto';
                         
                         resizeCanvas();
                     }
@@ -759,74 +700,48 @@
         }
 
         function resizeCanvas() {
-            canvas.width = imgElement.clientWidth;
-            canvas.height = imgElement.clientHeight;
+            canvas.width = img.clientWidth; canvas.height = img.clientHeight;
             drawRects();
         }
+        window.addEventListener('resize', () => { if(img.src) resizeCanvas(); });
 
-        window.addEventListener('resize', () => {
-            if (document.getElementById('training-canvas-container').style.display === 'block') {
-                resizeCanvas();
-            }
-        });
-
-        // Mouse/Touch events for drawing
         function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
+            const r = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
+            return { x: clientX - r.left, y: clientY - r.top };
         }
 
         function startDraw(e) {
             e.preventDefault();
             const pos = getPos(e);
-            startX = pos.x;
-            startY = pos.y;
-            isDrawing = true;
+            startX = pos.x; startY = pos.y; isDrawing = true;
         }
 
         function draw(e) {
             if (!isDrawing) return;
             e.preventDefault();
             const pos = getPos(e);
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRects(); 
-            
-            // Current rect
-            ctx.strokeStyle = 'rgba(220, 38, 38, 0.9)'; // Danger red
-            ctx.lineWidth = 3;
-            ctx.setLineDash([6, 4]);
+            drawRects();
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
             ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
-            ctx.fillStyle = 'rgba(220, 38, 38, 0.2)';
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
             ctx.fillRect(startX, startY, pos.x - startX, pos.y - startY);
         }
 
         function endDraw(e) {
             if (!isDrawing) return;
             isDrawing = false;
-            
-            // For touch end, clientX is in changedTouches
-            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-            const rect = canvas.getBoundingClientRect();
-            const endX = clientX - rect.left;
-            const endY = clientY - rect.top;
-            
-            if (Math.abs(endX - startX) > 10 && Math.abs(endY - startY) > 10) {
-                // Keep only latest rect for this demo
-                rects = [{
-                    x: startX,
-                    y: startY,
-                    w: endX - startX,
-                    h: endY - startY
-                }];
+            const pos = getPos(e.changedTouches ? e : e); // Handles touch end differently
+            if (e.changedTouches) {
+                const r = canvas.getBoundingClientRect();
+                pos.x = e.changedTouches[0].clientX - r.left;
+                pos.y = e.changedTouches[0].clientY - r.top;
             }
-            
+            if (Math.abs(pos.x - startX) > 10 && Math.abs(pos.y - startY) > 10) {
+                rects = [{ x: startX, y: startY, w: pos.x - startX, h: pos.y - startY }];
+            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawRects();
         }
@@ -834,74 +749,60 @@
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mouseleave', () => { if(isDrawing) isDrawing = false; drawRects(); });
-
+        canvas.addEventListener('mouseleave', () => { isDrawing = false; drawRects(); });
         canvas.addEventListener('touchstart', startDraw, {passive: false});
         canvas.addEventListener('touchmove', draw, {passive: false});
         canvas.addEventListener('touchend', endDraw);
 
         function drawRects() {
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([]);
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([]);
             rects.forEach(r => {
                 ctx.strokeRect(r.x, r.y, r.w, r.h);
-                ctx.fillStyle = 'rgba(220, 38, 38, 0.2)';
+                ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             });
         }
 
         function saveTrainingData() {
-            const category = document.getElementById('issue-category').value;
-            const desc = document.getElementById('issue-desc').value;
-            
-            if (rects.length === 0) {
-                alert("Please click and drag on the image to highlight a specific issue area.");
-                return;
-            }
-            
-            if (!category || !desc.trim()) {
-                alert("Please select a category and provide a training description.");
-                return;
-            }
+            if (!rects.length) return alert("Please highlight an area on the image.");
+            if (!document.getElementById('issue-category').value) return alert("Select a category.");
 
-            const btn = document.querySelector('.training-form .btn-primary');
-            const originalText = btn.innerText;
-            btn.innerText = 'Processing...';
+            const btn = document.getElementById('submit-training-btn');
+            const og = btn.innerHTML;
+            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Syncing...`;
             btn.disabled = true;
 
+            // Simulate save
             setTimeout(() => {
-                btn.innerText = 'Model Updated';
-                btn.style.backgroundColor = 'var(--success-color)';
-                
+                btn.style.background = 'var(--success)';
+                btn.innerHTML = 'Data Saved!';
                 setTimeout(() => {
                     resetTraining();
-                    btn.innerText = originalText;
+                    btn.style.background = '';
+                    btn.innerHTML = og;
                     btn.disabled = false;
-                    btn.style.backgroundColor = '';
-                }, 2000);
-            }, 1200);
+                }, 1500);
+            }, 1000);
         }
 
         function resetTraining() {
             document.getElementById('training-upload-area').style.display = 'block';
             document.getElementById('training-canvas-container').style.display = 'none';
-            document.getElementById('no-image-msg').style.display = 'block';
-            document.getElementById('issue-form').classList.add('hidden');
             document.getElementById('drawing-hint').classList.add('hidden');
+            
+            const form = document.getElementById('issue-form');
+            form.style.opacity = '0.5';
+            form.style.pointerEvents = 'none';
             
             document.getElementById('training-upload').value = '';
             document.getElementById('issue-category').value = '';
             document.getElementById('issue-desc').value = '';
-            
             rects = [];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            startCamera();
-        });
+        document.addEventListener('DOMContentLoaded', startCamera);
     </script>
+    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 </body>
 </html>
