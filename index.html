@@ -606,12 +606,12 @@
 
     <canvas id="capture-canvas" class="hidden"></canvas>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        import { getStorage, ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-        // Initialize Firebase using the provided configuration
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCMmUOdW2uEIGVd6XQfWXKF8eaFmwEog1g",
             authDomain: "oesperformance-a54c0.firebaseapp.com",
@@ -619,24 +619,22 @@
             storageBucket: "oesperformance-a54c0.firebasestorage.app"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-        // Export functions to window object so inline event handlers work with type="module"
-        window.switchTab = function(tabId) {
+        function switchTab(tabId) {
             document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
             
             document.querySelectorAll(`[onclick="switchTab('${tabId}')"]`).forEach(btn => btn.classList.add('active'));
             document.getElementById(`${tabId}-view`).classList.add('active');
 
-            tabId === 'vetting' ? window.startCamera() : window.stopCamera();
-        };
+            tabId === 'vetting' ? startCamera() : stopCamera();
+        }
 
-        // Camera Logic
         let currentStream = null;
-        window.startCamera = async function() {
+        async function startCamera() {
             const video = document.getElementById('video-stream');
             const container = document.getElementById('video-container');
             const controls = document.getElementById('camera-controls');
@@ -665,50 +663,49 @@
                     </div>
                 `;
             }
-        };
+        }
 
-        window.stopCamera = function() {
+        function stopCamera() {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
-        };
+        }
 
-        window.takePhoto = function() {
+        function takePhoto() {
             const video = document.getElementById('video-stream');
             const canvas = document.getElementById('capture-canvas');
             if (!video.srcObject) return;
             canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            window.showPreview(canvas.toDataURL('image/jpeg'));
-        };
+            showPreview(canvas.toDataURL('image/jpeg'));
+        }
 
-        window.handleFallbackUpload = function(event) {
+        function handleFallbackUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = e => window.showPreview(e.target.result);
+                reader.onload = e => showPreview(e.target.result);
                 reader.readAsDataURL(file);
             }
-        };
+        }
 
-        window.showPreview = function(url) {
-            window.stopCamera();
+        function showPreview(url) {
+            stopCamera();
             document.getElementById('camera-interface').classList.add('hidden');
             document.getElementById('preview-interface').classList.remove('hidden');
             document.getElementById('photo-preview').src = url;
             document.getElementById('analysis-results').style.display = 'none';
-        };
+        }
 
-        window.retakePhoto = function() {
+        function retakePhoto() {
             document.getElementById('preview-interface').classList.add('hidden');
             document.getElementById('camera-interface').classList.remove('hidden');
             document.getElementById('analysis-results').style.display = 'none';
-            window.startCamera();
-        };
+            startCamera();
+        }
 
-        // Analysis Logic
-        window.analyzePhoto = function() {
+        function analyzePhoto() {
             const btn = document.getElementById('analyze-btn');
             const effect = document.getElementById('scanning-effect');
             const line = document.getElementById('scanning-line');
@@ -720,11 +717,11 @@
             setTimeout(() => {
                 effect.style.display = 'none'; line.style.display = 'none';
                 btn.disabled = false; btn.innerText = 'Run AI Check';
-                window.renderResults(Math.random() > 0.4);
+                renderResults(Math.random() > 0.4);
             }, 2000);
-        };
+        }
 
-        window.renderResults = function(isPass) {
+        function renderResults(isPass) {
             const res = document.getElementById('analysis-results');
             if (isPass) {
                 res.innerHTML = `
@@ -756,15 +753,14 @@
                     </div>`;
             }
             res.style.display = 'block';
-        };
+        }
 
-        // Training Canvas Logic
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d');
         const img = document.getElementById('training-image');
         let isDrawing = false, startX, startY, rects = [];
 
-        window.handleTrainingUpload = function(e) {
+        function handleTrainingUpload(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -779,18 +775,18 @@
                         form.style.opacity = '1';
                         form.style.pointerEvents = 'auto';
                         
-                        window.resizeCanvas();
+                        resizeCanvas();
                     }
                 };
                 reader.readAsDataURL(file);
             }
-        };
+        }
 
-        window.resizeCanvas = function() {
+        function resizeCanvas() {
             canvas.width = img.clientWidth; canvas.height = img.clientHeight;
-            window.drawRects();
-        };
-        window.addEventListener('resize', () => { if(img.src) window.resizeCanvas(); });
+            drawRects();
+        }
+        window.addEventListener('resize', () => { if(img.src) resizeCanvas(); });
 
         function getPos(e) {
             const r = canvas.getBoundingClientRect();
@@ -810,7 +806,7 @@
             e.preventDefault();
             const pos = getPos(e);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            window.drawRects();
+            drawRects();
             ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
             ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
             ctx.fillStyle = 'rgba(96, 165, 250, 0.2)';
@@ -830,27 +826,27 @@
                 rects = [{ x: startX, y: startY, w: pos.x - startX, h: pos.y - startY }];
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            window.drawRects();
+            drawRects();
         }
 
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mouseleave', () => { isDrawing = false; window.drawRects(); });
+        canvas.addEventListener('mouseleave', () => { isDrawing = false; drawRects(); });
         canvas.addEventListener('touchstart', startDraw, {passive: false});
         canvas.addEventListener('touchmove', draw, {passive: false});
         canvas.addEventListener('touchend', endDraw);
 
-        window.drawRects = function() {
+        function drawRects() {
             ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([]);
             rects.forEach(r => {
                 ctx.strokeRect(r.x, r.y, r.w, r.h);
                 ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             });
-        };
+        }
 
-        window.saveTrainingData = async function() {
+        async function saveTrainingData() {
             if (!rects.length) return alert("Please highlight an area on the image.");
             const category = document.getElementById('issue-category').value;
             const description = document.getElementById('issue-desc').value;
@@ -864,25 +860,25 @@
             try {
                 // 1. Upload Image to Storage
                 const filename = \`ai_training/img_\${Date.now()}.jpg\`;
-                const storageReference = ref(storage, filename);
-                const uploadResult = await uploadString(storageReference, img.src, 'data_url');
-                const downloadURL = await getDownloadURL(uploadResult.ref);
+                const storageRef = storage.ref().child(filename);
+                await storageRef.putString(img.src, 'data_url');
+                const downloadURL = await storageRef.getDownloadURL();
 
                 // 2. Save data to Firestore 'AI metering' collection
-                await addDoc(collection(db, "AI metering"), {
+                await db.collection("AI metering").add({
                     imageUrl: downloadURL,
                     issueCategory: category,
                     trainingContext: description,
                     highlightBox: rects[0], // Coordinates for AI model
                     imageDimensions: { width: canvas.width, height: canvas.height },
-                    createdAt: serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 btn.style.background = 'linear-gradient(145deg, #059669, #047857)';
                 btn.innerHTML = 'Logged to Database!';
                 
                 setTimeout(() => {
-                    window.resetTraining();
+                    resetTraining();
                     btn.style.background = '';
                     btn.innerHTML = og;
                     btn.disabled = false;
@@ -900,9 +896,9 @@
                     btn.disabled = false;
                 }, 2000);
             }
-        };
+        }
 
-        window.resetTraining = function() {
+        function resetTraining() {
             document.getElementById('training-upload-area').style.display = 'block';
             document.getElementById('training-canvas-container').style.display = 'none';
             document.getElementById('drawing-hint').classList.add('hidden');
@@ -916,9 +912,9 @@
             document.getElementById('issue-desc').value = '';
             rects = [];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        };
+        }
 
-        document.addEventListener('DOMContentLoaded', window.startCamera);
+        document.addEventListener('DOMContentLoaded', startCamera);
     </script>
     <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 </body>
