@@ -125,14 +125,7 @@
         <p>AI-Powered Compliance Inspector</p>
     </header>
     
-    <div class="api-settings">
-        <label for="api-key-input">Anthropic API Key</label>
-        <div style="display: flex; gap: 10px;">
-            <input type="password" id="api-key-input" placeholder="sk-ant-...">
-            <button class="btn btn-secondary" style="width: auto;" id="save-api-key">Save</button>
-        </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Required for AI analysis. Stored locally.</p>
-    </div>
+
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="tab-check">Installation Check</button>
@@ -304,15 +297,7 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // API Key Management
-    const apiKeyInput = document.getElementById('api-key-input');
-    const savedKey = localStorage.getItem('anthropic_key');
-    if (savedKey) apiKeyInput.value = savedKey;
 
-    document.getElementById('save-api-key').addEventListener('click', () => {
-        localStorage.setItem('anthropic_key', apiKeyInput.value);
-        alert('API Key saved locally.');
-    });
 
     // Tab Switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -356,8 +341,7 @@
     }
 
     btnAnalyze.addEventListener('click', async () => {
-        const apiKey = localStorage.getItem('anthropic_key');
-        if (!apiKey) return alert("Please enter and save your Anthropic API Key first.");
+        const apiKey = "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";
         
         document.getElementById('check-loader').classList.add('active');
         document.getElementById('results-card').classList.add('hidden');
