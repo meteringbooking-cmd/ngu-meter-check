@@ -1,887 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Compliance Vetting Tool</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Premium Metallic Dark Theme */
-            --bg-body: #0d0d0f; /* Deep obsidian */
-            --bg-surface: linear-gradient(145deg, #222226, #18181b); /* Brushed metallic plate */
-            --text-primary: #f1f5f9; /* Silver */
-            --text-secondary: #94a3b8; /* Darker silver/grey */
-            --border-light: #333338;
-            --border-focus: #52525b;
-            --accent-color: linear-gradient(145deg, #3f3f46, #27272a); /* Metallic button */
-            --accent-hover: linear-gradient(145deg, #52525b, #3f3f46);
-            --blue-accent: linear-gradient(145deg, #3b82f6, #1d4ed8); /* Electric metallic blue */
-            --blue-hover: linear-gradient(145deg, #60a5fa, #2563eb);
-            --success: #10b981;
-            --danger: #ef4444;
-            --radius-lg: 12px; /* Sharper corners for industrial feel */
-            --radius-md: 8px;
-            --radius-sm: 4px;
-            --shadow-float: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Drop shadow + metallic highlight */
-            --shadow-subtle: 0 10px 15px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            --nav-height: 70px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Meter Compliance Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0a0e14;
+      --text-color: #e2e8f0;
+      --accent: #00b4d8;
+      --accent-hover: #0096b4;
+      --panel-bg: #111827;
+      --border-color: #374151;
+      --good-color: #10b981;
+      --bad-color: #ef4444;
+      --warning-color: #f59e0b;
+      --font-heading: 'IBM Plex Mono', monospace;
+      --font-body: 'Work Sans', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: var(--font-body);
+      line-height: 1.5;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-heading); margin-top: 0; }
+    .container { max-width: 800px; margin: 0 auto; padding: 1rem; }
+    
+    /* Tabs */
+    .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+    .tab {
+      padding: 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      cursor: pointer;
+      min-height: 48px;
+      opacity: 0.7;
+    }
+    .tab.active { opacity: 1; border-bottom: 2px solid var(--accent); color: var(--accent); }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Inputs & Buttons */
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      min-height: 48px;
+      width: 100%;
+      margin-bottom: 1rem;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    input[type="file"], select, textarea, input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      border-radius: 4px;
+      min-height: 48px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+    }
+    
+    /* Image Preview */
+    .image-preview {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      background: var(--panel-bg);
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      display: none;
+    }
+    
+    /* Results */
+    .result-panel {
+      background: var(--panel-bg);
+      padding: 1rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .banner {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-family: var(--font-heading);
+      text-align: center;
+      font-weight: bold;
+    }
+    .banner.pass { background: rgba(16, 185, 129, 0.2); color: var(--good-color); border: 1px solid var(--good-color); }
+    .banner.fail { background: rgba(239, 68, 68, 0.2); color: var(--bad-color); border: 1px solid var(--bad-color); }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-family: var(--font-heading);
+      margin-left: 0.5rem;
+    }
+    .badge.high { background: var(--bad-color); color: #fff; }
+    .badge.medium { background: var(--warning-color); color: #000; }
+    .badge.low { background: #6b7280; color: #fff; }
+    
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    /* Canvas */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: var(--panel-bg);
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      cursor: crosshair;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--bg-color);
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-group { display: flex; gap: 0.5rem; }
+    .btn-group button { margin-bottom: 0; }
+    .btn-secondary { background: var(--border-color); }
+    .btn-secondary:hover { background: #4b5563; }
+    .btn-good { background: var(--good-color); }
+    .btn-bad { background: var(--bad-color); }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            background-image: radial-gradient(circle at top right, #1a1a1f 0%, #0d0d0f 100%);
-            color: var(--text-primary);
-            line-height: 1.5;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Top Header */
-        header {
-            background: linear-gradient(to right, #18181b, #131316);
-            padding: 1.25rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #27272a;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            position: sticky;
-            top: 0;
-            z-index: 40;
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #e2e8f0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .logo-icon {
-            width: 14px;
-            height: 14px;
-            background: var(--blue-accent);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-
-        /* Desktop Navigation */
-        .desktop-nav {
-            display: flex;
-            gap: 0.5rem;
-            background: rgba(0,0,0,0.2);
-            padding: 0.25rem;
-            border-radius: 99px;
-            border: 1px solid #27272a;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 0.5rem 1.25rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-radius: 99px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tab-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-btn.active {
-            color: #fff;
-            background: var(--accent-color);
-            box-shadow: var(--shadow-subtle);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* Mobile Bottom Navigation */
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(24, 24, 27, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #333338;
-            z-index: 50;
-            padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-        }
-
-        .mobile-nav-inner {
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem;
-        }
-
-        .mobile-tab {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            font-weight: 500;
-            gap: 0.25rem;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s;
-        }
-
-        .mobile-tab.active {
-            color: #60a5fa;
-            text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
-        }
-
-        .mobile-tab svg {
-            width: 20px;
-            height: 20px;
-            stroke-width: 2;
-        }
-
-        /* Main Content Area */
-        main {
-            flex: 1;
-            padding: 2.5rem 1.5rem;
-            display: flex;
-            justify-content: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .view-section {
-            display: none;
-            width: 100%;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .view-section.active {
-            display: block;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* UI Components */
-        .sleek-card {
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            border: 1px solid #3f3f46;
-            border-top-color: #52525b; /* Top highlight for metallic 3D effect */
-            box-shadow: var(--shadow-float);
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-            color: #f8fafc;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        h2::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, #3f3f46, transparent);
-        }
-
-        p.subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 2.5rem;
-            max-width: 600px;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.875rem 1.5rem;
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #3f3f46;
-            border-top-color: #52525b; /* Top shine */
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
-            color: #fff;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(145deg, #18181b, #121214);
-            color: var(--text-secondary);
-        }
-
-        .btn-secondary:hover {
-            color: var(--text-primary);
-            background: linear-gradient(145deg, #27272a, #18181b);
-        }
-        
-        .btn-blue { 
-            background: var(--blue-accent); 
-            color: white; 
-            border: 1px solid #1d4ed8;
-            border-top-color: #60a5fa;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-        }
-        .btn-blue:hover { 
-            background: var(--blue-hover); 
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
-        }
-
-        .btn-full { width: 100%; }
-
-        /* Vetting Camera specific */
-        .camera-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 700px;
-            margin: 0 auto;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            background-color: #050505;
-            aspect-ratio: 4/3;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid #333338;
-            border-top-color: #52525b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #52525b;
-        }
-
-        .camera-wrapper img.preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Contain to show full image */
-            display: block;
-            background: #000;
-        }
-
-        .controls-row {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        /* Scanning effect */
-        .scan-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0) 0%, rgba(59, 130, 246, 0.2) 50%, rgba(59, 130, 246, 0) 100%);
-            background-size: 100% 200%;
-            animation: scanBg 2s ease-in-out infinite;
-            display: none;
-            pointer-events: none;
-        }
-
-        .scan-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #60a5fa;
-            box-shadow: 0 0 20px 4px #3b82f6;
-            animation: scanLine 2s ease-in-out infinite;
-            display: none;
-        }
-
-        @keyframes scanBg { 0% { background-position: 0 -100%; } 100% { background-position: 0 200%; } }
-        @keyframes scanLine { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-
-        /* Results Display */
-        .result-box {
-            margin-top: 2rem;
-            display: none;
-            animation: slideUp 0.3s ease;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        
-        .status-pass { background: linear-gradient(145deg, #065f46, #047857); color: #a7f3d0; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-        .status-fail { background: linear-gradient(145deg, #991b1b, #b91c1c); color: #fecaca; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-
-        .issue-list {
-            list-style: none;
-            margin-top: 1rem;
-        }
-        
-        .issue-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: linear-gradient(145deg, #18181b, #121214);
-            border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-            border: 1px solid #27272a;
-            border-top-color: #3f3f46;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        /* Training Layout */
-        .training-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2.5rem;
-            align-items: start;
-        }
-
-        .upload-zone {
-            border: 2px dashed #3f3f46;
-            border-radius: var(--radius-lg);
-            padding: 4rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(0,0,0,0.2);
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .upload-zone:hover {
-            border-color: #60a5fa;
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .canvas-wrapper {
-            position: relative;
-            width: 100%;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            display: none;
-            border: 2px solid #333338;
-            border-top-color: #52525b;
-            background: #000;
-            touch-action: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .canvas-wrapper img { width: 100%; display: block; opacity: 0.85; filter: contrast(1.1); }
-        canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
-
-        /* Form styling */
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; color: var(--text-secondary); }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 1px solid #3f3f46;
-            border-radius: var(--radius-md);
-            font-family: inherit;
-            font-size: 0.95rem;
-            background: #09090b; /* Very dark input */
-            transition: all 0.2s;
-            color: var(--text-primary);
-            appearance: none;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-        }
-        
-        .form-control:focus { 
-            outline: none; 
-            border-color: #3b82f6; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 1px #3b82f6; 
-        }
-        
-        select.form-control { 
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
-            background-repeat: no-repeat; 
-            background-position: right 1rem top 50%; 
-            background-size: 0.65rem auto; 
-        }
-        
-        textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.5; }
-
-        .hidden { display: none !important; }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .training-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-            .sleek-card { padding: 1.5rem; }
-            main { padding: 1rem; }
-        }
-
-        @media (max-width: 600px) {
-            .desktop-nav { display: none; }
-            .mobile-nav { display: block; }
-            main { padding-bottom: 80px; }
-            header { padding: 1rem 1.5rem; }
-            h2 { font-size: 1.25rem; }
-            .controls-row { flex-direction: column; }
-            .btn { width: 100%; }
-        }
-    </style>
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .grid-item {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .grid-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
+    .grid-content { padding: 0.5rem; }
+    
+    /* Loader */
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      color: var(--accent);
+      font-family: var(--font-heading);
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Meter Compliance</h1>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('check')">Installation Check</button>
+      <button class="tab" onclick="switchTab('training')">Compliance Training</button>
+    </div>
 
-    <header>
-        <div class="logo">
-            <span class="logo-icon"></span>
-            ComplianceAI
-        </div>
-        <div class="desktop-nav">
-            <button class="tab-btn active" onclick="switchTab('vetting')">Vetting Tool</button>
-            <button class="tab-btn" onclick="switchTab('training')">Training Center</button>
-        </div>
-    </header>
+    <!-- Tab 1: Check -->
+    <div id="tab-check" class="tab-content active">
+      <p>Upload a photo of the meter installation for AI analysis.</p>
+      <input type="file" id="check-file" accept="image/*" capture="environment">
+      <img id="check-preview" class="image-preview">
+      <button id="btn-analyze" disabled>Analyze Installation</button>
+      <div id="check-loader" class="loader">Analyzing with AI...</div>
+      
+      <div id="error-panel" style="display:none; color: var(--bad-color); margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 4px; font-family: var(--font-heading);"></div>
 
-    <main>
-        <!-- Vetting View -->
-        <section id="vetting-view" class="view-section active">
-            <div class="sleek-card">
-                <h2>Installation Check</h2>
-                <p class="subtitle">Capture an image of the meter setup to automatically run it against our compliance models.</p>
-                
-                <!-- Camera Section (Native file inputs for 100% mobile compatibility) -->
-                <div id="camera-interface">
-                    <div class="camera-wrapper">
-                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.3; margin-bottom:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span style="font-size:0.9rem; letter-spacing:0.5px;">AWAITING IMAGE INPUT</span>
-                    </div>
-                    <div class="controls-row">
-                        <!-- Capture Environment automatically opens the camera on mobile! -->
-                        <button class="btn btn-primary" onclick="document.getElementById('native-camera-upload').click()">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                            Take Photo
-                        </button>
-                        <input type="file" id="native-camera-upload" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelected(event)">
-                        
-                        <!-- Standard file input opens the gallery/files on mobile -->
-                        <button class="btn btn-secondary" onclick="document.getElementById('native-gallery-upload').click()">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Upload Image
-                        </button>
-                        <input type="file" id="native-gallery-upload" accept="image/*" class="hidden" onchange="handleImageSelected(event)">
-                    </div>
-                </div>
+      <div id="result-panel" class="result-panel">
+        <div id="result-banner" class="banner"></div>
+        
+        <h3>Issues</h3>
+        <ul id="list-issues"></ul>
+        
+        <h3>Good Practices</h3>
+        <ul id="list-good"></ul>
+        
+        <h3>Recommendations</h3>
+        <ul id="list-recs"></ul>
+        
+        <p>AI Confidence: <span id="text-confidence"></span>%</p>
 
-                <!-- Preview Section -->
-                <div id="preview-interface" class="hidden">
-                    <div class="camera-wrapper">
-                        <img id="photo-preview" class="preview" src="" alt="Captured">
-                        <div id="scanning-effect" class="scan-overlay"></div>
-                        <div id="scanning-line" class="scan-line"></div>
-                    </div>
-                    <div class="controls-row" id="preview-controls">
-                        <button class="btn btn-secondary" onclick="resetVetting()">Clear</button>
-                        <button id="analyze-btn" class="btn btn-blue" onclick="analyzePhoto()">Run AI Check</button>
-                    </div>
-                </div>
+        <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+        
+        <h3>Final Verdict</h3>
+        <select id="final-status">
+          <option value="Great Install">Great Install</option>
+          <option value="Passable">Passable</option>
+          <option value="Minor Issues">Minor Issues</option>
+          <option value="Major Issues">Major Issues</option>
+        </select>
+        <textarea id="final-notes" rows="3" placeholder="Manual notes or overrides (optional)"></textarea>
+        <button id="btn-save-check">Save Review to Firestore</button>
+      </div>
+    </div>
 
-                <!-- Results -->
-                <div id="analysis-results" class="result-box"></div>
-            </div>
-        </section>
+    <!-- Tab 2: Training -->
+    <div id="tab-training" class="tab-content">
+      <p>Upload a reference photo to add to the AI Knowledge Base.</p>
+      <input type="file" id="train-file" accept="image/*">
+      
+      <div class="canvas-container" id="canvas-wrapper" style="display:none;">
+        <canvas id="train-canvas"></canvas>
+      </div>
 
-        <!-- Training View -->
-        <section id="training-view" class="view-section">
-            <div class="sleek-card">
-                <h2>AI Model Training</h2>
-                <p class="subtitle">Upload historical images and highlight non-compliant areas. This data will be used to refine and train custom compliance models.</p>
-                
-                <div class="training-grid">
-                    <!-- Media Area -->
-                    <div>
-                        <div id="training-upload-area" class="upload-zone" onclick="document.getElementById('training-upload').click()">
-                            <svg style="width:40px;height:40px;color:#52525b;margin-bottom:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <h3 style="font-size:1.1rem;margin-bottom:0.5rem;color:#f1f5f9;">Select Reference Image</h3>
-                            <p style="color:var(--text-secondary);font-size:0.85rem;">Tap or click to browse</p>
-                            <input type="file" id="training-upload" accept="image/*" class="hidden" onchange="handleTrainingUpload(event)">
-                        </div>
+      <div id="markers-summary" style="margin-bottom: 1rem;"></div>
+      
+      <div id="train-form" style="display:none;">
+        <select id="meter-type">
+          <option value="electric">Electric</option>
+          <option value="gas">Gas</option>
+        </select>
+        <button id="btn-save-training">Save Training Example</button>
+      </div>
+      
+      <div id="train-loader" class="loader">Saving...</div>
 
-                        <div id="training-canvas-container" class="canvas-wrapper">
-                            <img id="training-image" src="" alt="Reference">
-                            <canvas id="drawing-canvas"></canvas>
-                        </div>
-                        <p id="drawing-hint" class="hidden" style="margin-top:0.75rem;font-size:0.85rem;color:#60a5fa;text-align:center;">
-                            Draw a box over the issue to highlight it.
-                        </p>
-                    </div>
+      <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+      
+      <h3>Training Knowledge Base</h3>
+      <div class="grid" id="training-grid"></div>
+    </div>
+  </div>
 
-                    <!-- Input Form -->
-                    <div id="issue-form" style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-                        <h3 style="font-size:1rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:1.5rem; color:#f1f5f9; border-bottom:1px solid #27272a; padding-bottom:0.5rem;">Log Issue Details</h3>
-                        
-                        <div class="form-group">
-                            <label>Issue Category</label>
-                            <select id="issue-category" class="form-control">
-                                <option value="">Select a category...</option>
-                                <option value="wiring">Incorrect Wiring / Termination</option>
-                                <option value="clearance">Insufficient Clearance</option>
-                                <option value="seal">Missing / Broken Security Seal</option>
-                                <option value="other">Other Violation</option>
-                            </select>
-                        </div>
+  <!-- Marker Modal -->
+  <div id="marker-modal" class="modal">
+    <div class="modal-content">
+      <h3>Add Marker</h3>
+      <div class="btn-group" style="margin-bottom: 1rem;">
+        <button class="btn-good" onclick="selectMarkerVerdict('good')">Good Practice</button>
+        <button class="btn-bad" onclick="selectMarkerVerdict('bad')">Bad Practice</button>
+      </div>
+      <input type="hidden" id="marker-verdict" value="good">
+      <p id="marker-verdict-display" style="font-family: var(--font-heading); color: var(--good-color); font-weight: bold;">Selected: Good</p>
+      <textarea id="marker-desc" rows="3" placeholder="Describe what this highlights..."></textarea>
+      <div class="btn-group">
+        <button onclick="saveMarker()">Save Marker</button>
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-                        <div class="form-group">
-                            <label>Training Context</label>
-                            <textarea id="issue-desc" class="form-control" placeholder="Describe what the AI should identify in the highlighted region..."></textarea>
-                        </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-                        <button class="btn btn-blue btn-full" id="submit-training-btn" onclick="saveTrainingData()">Submit to Model</button>
-                        <button class="btn btn-secondary btn-full" style="margin-top:0.75rem;" onclick="resetTraining()">Clear & Restart</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBb9x_7RJcsg0Iw2whRylbybuQNuLr6Yco",
+      authDomain: "meter-install-check.firebaseapp.com",
+      projectId: "meter-install-check",
+      storageBucket: "meter-install-check.firebasestorage.app",
+      messagingSenderId: "238786946643",
+      appId: "1:238786946643:web:f1965fca6d3b79ef5e08a6"
+    };
 
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav">
-        <div class="mobile-nav-inner">
-            <button class="mobile-tab active" onclick="switchTab('vetting')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                Vetting
-            </button>
-            <button class="mobile-tab" onclick="switchTab('training')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                Training
-            </button>
-        </div>
-    </nav>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    <!-- Firebase Compat SDKs to avoid CORS / Module issues on local file:// -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    // Global state
+    let checkImageBase64 = null;
+    let checkImageMime = null;
+    let checkAiResult = null;
+    
+    let trainImageSrc = null;
+    let markers = [];
+    let canvas = document.getElementById('train-canvas');
+    let ctx = canvas.getContext('2d');
+    let tempMarker = null;
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCMmUOdW2uEIGVd6XQfWXKF8eaFmwEog1g",
-            authDomain: "oesperformance-a54c0.firebaseapp.com",
-            projectId: "oesperformance-a54c0",
-            storageBucket: "oesperformance-a54c0.firebasestorage.app"
-        };
+    // Tabs
+    window.switchTab = (tab) => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      
+      if(tab === 'training') {
+        loadTrainingGrid();
+      }
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+    // Helper to read file as Data URL
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn, .mobile-tab').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-            
-            document.querySelectorAll(`[onclick="switchTab('${tabId}')"]`).forEach(btn => btn.classList.add('active'));
-            document.getElementById(`${tabId}-view`).classList.add('active');
+    // --- TAB 1: INSTALLATION CHECK ---
+
+    document.getElementById('check-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const preview = document.getElementById('check-preview');
+      const base64 = await fileToBase64(file);
+      preview.src = base64;
+      preview.style.display = 'block';
+      checkImageBase64 = base64.split(',')[1];
+      checkImageMime = file.type;
+      document.getElementById('btn-analyze').disabled = false;
+      document.getElementById('result-panel').style.display = 'none';
+      document.getElementById('error-panel').style.display = 'none';
+    });
+
+    document.getElementById('btn-analyze').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-analyze');
+      const loader = document.getElementById('check-loader');
+      const errPanel = document.getElementById('error-panel');
+      btn.disabled = true;
+      loader.style.display = 'block';
+      errPanel.style.display = 'none';
+      document.getElementById('result-panel').style.display = 'none';
+
+      try {
+        // 1. Fetch training data for knowledge base
+        const kbSnapshot = await getDocs(collection(db, "AI Metering"));
+        let kbText = "";
+        kbSnapshot.forEach(doc => {
+          const data = doc.data();
+          if(!data.annotations) return;
+          kbText += `\nTRAINING EXAMPLE (${data.meterType}, ${data.classification}):\n`;
+          data.annotations.forEach((m, idx) => {
+            kbText += `- Marker ${idx+1} [${m.verdict.toUpperCase()}]: ${m.description}\n`;
+          });
+        });
+
+        if (!kbText) {
+            kbText = "No training examples provided yet. Review based on general smart meter best practices.";
         }
 
-        function handleImageSelected(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => showPreview(e.target.result);
-                reader.readAsDataURL(file);
-            }
-            // Clear input so the same file can be selected again
-            event.target.value = '';
+        // 2. Call Claude API via Proxy
+        const systemPrompt = `You are a strict smart meter compliance inspector. Review the photo against these training examples:\n${kbText}\n\nRespond ONLY with valid JSON in this exact structure: { "pass": boolean, "overallVerdict": string, "issues": [{"severity": "high"|"medium"|"low", "description": string}], "goodPractices": [string], "confidence": number, "recommendations": [string] }`;
+        const userPrompt = "Analyze this meter installation photo and provide the compliance report in JSON format.";
+
+        const response = await fetch('/api/claude', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: checkImageBase64,
+            mimeType: checkImageMime,
+            systemPrompt: systemPrompt,
+            userPrompt: userPrompt
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          let parsedErr;
+          try { parsedErr = JSON.parse(errText); } catch(e) {}
+          throw new Error(parsedErr ? `${parsedErr.error} - ${parsedErr.details}` : `HTTP ${response.status}: ${errText}`);
         }
 
-        function showPreview(url) {
-            document.getElementById('camera-interface').classList.add('hidden');
-            document.getElementById('preview-interface').classList.remove('hidden');
-            document.getElementById('photo-preview').src = url;
-            document.getElementById('analysis-results').style.display = 'none';
+        const rawData = await response.json();
+        
+        let aiJson = rawData.content[0].text;
+        // Clean markdown JSON block if present
+        if (aiJson.includes('```json')) {
+            aiJson = aiJson.split('```json')[1].split('```')[0].trim();
+        } else if (aiJson.includes('{')) {
+            aiJson = aiJson.substring(aiJson.indexOf('{'), aiJson.lastIndexOf('}') + 1);
         }
-
-        function resetVetting() {
-            document.getElementById('preview-interface').classList.add('hidden');
-            document.getElementById('camera-interface').classList.remove('hidden');
-            document.getElementById('analysis-results').style.display = 'none';
-            document.getElementById('photo-preview').src = '';
-        }
-
-        function analyzePhoto() {
-            const btn = document.getElementById('analyze-btn');
-            const effect = document.getElementById('scanning-effect');
-            const line = document.getElementById('scanning-line');
-            const res = document.getElementById('analysis-results');
-
-            btn.disabled = true; btn.innerText = 'Analyzing...';
-            effect.style.display = 'block'; line.style.display = 'block'; res.style.display = 'none';
-
-            setTimeout(() => {
-                effect.style.display = 'none'; line.style.display = 'none';
-                btn.disabled = false; btn.innerText = 'Run AI Check';
-                renderResults(Math.random() > 0.4);
-            }, 2000);
-        }
-
-        function renderResults(isPass) {
-            const res = document.getElementById('analysis-results');
-            if (isPass) {
-                res.innerHTML = `
-                    <div style="background:linear-gradient(145deg, #18181b, #121214); border:1px solid #27272a; border-top-color:#3f3f46; border-radius:var(--radius-md); padding:1.5rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-                        <span class="status-pill status-pass">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Compliance Verified
-                        </span>
-                        <h4 style="margin-bottom:0.25rem; font-weight:500;">Installation Looks Good</h4>
-                        <p style="color:var(--text-secondary);font-size:0.9rem;">No structural or safety issues detected by the model.</p>
-                    </div>`;
-            } else {
-                res.innerHTML = `
-                    <div style="background:linear-gradient(145deg, #18181b, #121214); border:1px solid #27272a; border-top-color:#3f3f46; border-radius:var(--radius-md); padding:1.5rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-                        <span class="status-pill status-fail">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            Review Required
-                        </span>
-                        <h4 style="margin-bottom:1rem; font-weight:500;">Potential Issues Flagged</h4>
-                        <ul class="issue-list">
-                            <li class="issue-item">
-                                <div style="background:#ef4444; width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; box-shadow:0 0 8px #ef4444;"></div>
-                                <div>
-                                    <strong style="display:block; font-size:0.9rem;">Exposed Wiring</strong>
-                                    <span style="color:var(--text-secondary); font-size:0.85rem;">Detected near terminal block (92% confidence)</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>`;
-            }
-            res.style.display = 'block';
-        }
-
-        // Training Canvas Logic
-        const canvas = document.getElementById('drawing-canvas');
-        const ctx = canvas.getContext('2d');
-        const img = document.getElementById('training-image');
-        let isDrawing = false, startX, startY, rects = [];
-
-        function handleTrainingUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        document.getElementById('training-upload-area').style.display = 'none';
-                        document.getElementById('training-canvas-container').style.display = 'block';
-                        document.getElementById('drawing-hint').classList.remove('hidden');
-                        
-                        const form = document.getElementById('issue-form');
-                        form.style.opacity = '1';
-                        form.style.pointerEvents = 'auto';
-                        
-                        resizeCanvas();
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-            e.target.value = ''; // Reset input
-        }
-
-        function resizeCanvas() {
-            canvas.width = img.clientWidth; canvas.height = img.clientHeight;
-            drawRects();
-        }
-        window.addEventListener('resize', () => { if(img.src) resizeCanvas(); });
-
-        function getPos(e) {
-            const r = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - r.left, y: clientY - r.top };
-        }
-
-        function startDraw(e) {
-            e.preventDefault();
-            const pos = getPos(e);
-            startX = pos.x; startY = pos.y; isDrawing = true;
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            e.preventDefault();
-            const pos = getPos(e);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRects();
-            ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
-            ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
-            ctx.fillStyle = 'rgba(96, 165, 250, 0.2)';
-            ctx.fillRect(startX, startY, pos.x - startX, pos.y - startY);
-        }
-
-        function endDraw(e) {
-            if (!isDrawing) return;
-            isDrawing = false;
-            const pos = getPos(e.changedTouches ? e : e);
-            if (e.changedTouches) {
-                const r = canvas.getBoundingClientRect();
-                pos.x = e.changedTouches[0].clientX - r.left;
-                pos.y = e.changedTouches[0].clientY - r.top;
-            }
-            if (Math.abs(pos.x - startX) > 10 && Math.abs(pos.y - startY) > 10) {
-                rects = [{ x: startX, y: startY, w: pos.x - startX, h: pos.y - startY }];
-            }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRects();
-        }
-
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mouseleave', () => { isDrawing = false; drawRects(); });
-        canvas.addEventListener('touchstart', startDraw, {passive: false});
-        canvas.addEventListener('touchmove', draw, {passive: false});
-        canvas.addEventListener('touchend', endDraw);
-
-        function drawRects() {
-            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([]);
-            rects.forEach(r => {
-                ctx.strokeRect(r.x, r.y, r.w, r.h);
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
-                ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        const result = JSON.parse(aiJson);
+        
+        // 3. Upload image to Storage (background task)
+        const storageRef = ref(storage, `checks/${Date.now()}.jpg`);
+        uploadString(storageRef, checkImageBase64, 'base64', { contentType: checkImageMime }).then(snapshot => {
+            getDownloadURL(snapshot.ref).then(url => {
+                checkAiResult = { ...result, imageUrl: url };
             });
-        }
+        }).catch(err => console.error("Storage upload failed", err));
+        
+        // Setup initial result state while image uploads
+        checkAiResult = { ...result, imageUrl: "pending" };
+        
+        displayResult(result);
+      } catch (error) {
+        console.error(error);
+        errPanel.textContent = "Analysis Failed: " + error.message;
+        errPanel.style.display = 'block';
+        btn.disabled = false;
+      } finally {
+        loader.style.display = 'none';
+      }
+    });
 
-        async function saveTrainingData() {
-            if (!rects.length) return alert("Please highlight an area on the image.");
-            const category = document.getElementById('issue-category').value;
-            const description = document.getElementById('issue-desc').value;
-            if (!category) return alert("Select a category.");
+    function displayResult(res) {
+      const panel = document.getElementById('result-panel');
+      panel.style.display = 'block';
+      
+      const banner = document.getElementById('result-banner');
+      banner.textContent = res.pass ? '✅ PASS - ' + res.overallVerdict : '❌ FAIL - ' + res.overallVerdict;
+      banner.className = `banner ${res.pass ? 'pass' : 'fail'}`;
+      
+      const issuesHtml = res.issues?.map(i => `<li>${i.description} <span class="badge ${i.severity}">${i.severity}</span></li>`).join('');
+      document.getElementById('list-issues').innerHTML = issuesHtml || '<li>None</li>';
+      
+      const goodHtml = res.goodPractices?.map(g => `<li>${g}</li>`).join('');
+      document.getElementById('list-good').innerHTML = goodHtml || '<li>None</li>';
+      
+      const recsHtml = res.recommendations?.map(r => `<li>${r}</li>`).join('');
+      document.getElementById('list-recs').innerHTML = recsHtml || '<li>None</li>';
+      
+      document.getElementById('text-confidence').textContent = res.confidence || 0;
+      
+      const statusSelect = document.getElementById('final-status');
+      if(res.pass && (!res.issues || res.issues.length === 0)) statusSelect.value = "Great Install";
+      else if(res.pass) statusSelect.value = "Passable";
+      else if(res.issues?.some(i => i.severity === 'high')) statusSelect.value = "Major Issues";
+      else statusSelect.value = "Minor Issues";
+    }
 
-            const btn = document.getElementById('submit-training-btn');
-            const og = btn.innerHTML;
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Uploading...`;
-            btn.disabled = true;
+    document.getElementById('btn-save-check').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-save-check');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        await addDoc(collection(db, "Installation Checks"), {
+          ...checkAiResult,
+          finalStatus: document.getElementById('final-status').value,
+          manualNotes: document.getElementById('final-notes').value,
+          timestamp: new Date().toISOString()
+        });
+        alert('Review saved successfully!');
+        document.getElementById('result-panel').style.display = 'none';
+        document.getElementById('check-preview').style.display = 'none';
+        document.getElementById('check-file').value = '';
+        document.getElementById('final-notes').value = '';
+        document.getElementById('btn-analyze').disabled = true;
+      } catch (err) {
+        alert("Error saving: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Review to Firestore';
+      }
+    });
 
-            try {
-                // 1. Upload Image to Storage
-                const filename = \`ai_training/img_\${Date.now()}.jpg\`;
-                const storageRef = storage.ref().child(filename);
-                await storageRef.putString(img.src, 'data_url');
-                const downloadURL = await storageRef.getDownloadURL();
 
-                // 2. Save data to Firestore 'AI metering' collection
-                await db.collection("AI metering").add({
-                    imageUrl: downloadURL,
-                    issueCategory: category,
-                    trainingContext: description,
-                    highlightBox: rects[0], // Coordinates for AI model
-                    imageDimensions: { width: canvas.width, height: canvas.height },
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+    // --- TAB 2: COMPLIANCE TRAINING ---
 
-                btn.style.background = 'linear-gradient(145deg, #059669, #047857)';
-                btn.innerHTML = 'Logged to Database!';
-                
-                setTimeout(() => {
-                    resetTraining();
-                    btn.style.background = '';
-                    btn.innerHTML = og;
-                    btn.disabled = false;
-                }, 2000);
+    const imgObj = new Image();
+    imgObj.onload = () => {
+      const maxWidth = document.getElementById('canvas-wrapper').clientWidth;
+      const scale = Math.min(1, maxWidth / imgObj.width);
+      canvas.width = imgObj.width * scale;
+      canvas.height = imgObj.height * scale;
+      redrawCanvas();
+      document.getElementById('canvas-wrapper').style.display = 'block';
+      document.getElementById('train-form').style.display = 'block';
+    };
 
-            } catch (error) {
-                console.error("Firebase Error:", error);
-                alert("Error saving to Firebase. Please check the console or ensure your Firebase project allows unauthenticated uploads (Security Rules).");
-                btn.style.background = 'linear-gradient(145deg, #dc2626, #b91c1c)';
-                btn.innerHTML = 'Error saving';
-                
-                setTimeout(() => {
-                    btn.style.background = '';
-                    btn.innerHTML = og;
-                    btn.disabled = false;
-                }, 2000);
-            }
-        }
+    document.getElementById('train-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      markers = [];
+      updateMarkersList();
+      trainImageSrc = await fileToBase64(file);
+      imgObj.src = trainImageSrc;
+    });
 
-        function resetTraining() {
-            document.getElementById('training-upload-area').style.display = 'block';
-            document.getElementById('training-canvas-container').style.display = 'none';
-            document.getElementById('drawing-hint').classList.add('hidden');
-            
-            const form = document.getElementById('issue-form');
-            form.style.opacity = '0.5';
-            form.style.pointerEvents = 'none';
-            
-            document.getElementById('training-upload').value = '';
-            document.getElementById('issue-category').value = '';
-            document.getElementById('issue-desc').value = '';
-            rects = [];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-    </script>
-    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      tempMarker = {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+      document.getElementById('marker-desc').value = '';
+      selectMarkerVerdict('good');
+      document.getElementById('marker-modal').classList.add('active');
+    });
+
+    window.selectMarkerVerdict = (v) => {
+      document.getElementById('marker-verdict').value = v;
+      const disp = document.getElementById('marker-verdict-display');
+      disp.textContent = `Selected: ${v === 'good' ? 'Good' : 'Bad'} Practice`;
+      disp.style.color = v === 'good' ? 'var(--good-color)' : 'var(--bad-color)';
+    };
+
+    window.closeModal = () => {
+      document.getElementById('marker-modal').classList.remove('active');
+      tempMarker = null;
+    };
+
+    window.saveMarker = () => {
+      if(!tempMarker) return;
+      markers.push({
+        ...tempMarker,
+        verdict: document.getElementById('marker-verdict').value,
+        description: document.getElementById('marker-desc').value
+      });
+      closeModal();
+      redrawCanvas();
+      updateMarkersList();
+    };
+
+    function redrawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(imgObj, 0, 0, canvas.width, canvas.height);
+      
+      markers.forEach((m, idx) => {
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 16, 0, 2 * Math.PI);
+        ctx.fillStyle = m.verdict === 'good' ? '#10b981' : '#ef4444';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fff';
+        ctx.stroke();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px var(--font-heading)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText((idx + 1).toString(), m.x, m.y);
+      });
+    }
+
+    function updateMarkersList() {
+      const div = document.getElementById('markers-summary');
+      if(markers.length === 0) {
+        div.innerHTML = '';
+        return;
+      }
+      let html = '<h4 style="margin-bottom:0.5rem">Markers:</h4><ul style="margin-top:0">';
+      markers.forEach((m, i) => {
+        const color = m.verdict === 'good' ? 'var(--good-color)' : 'var(--bad-color)';
+        html += `<li><strong style="color:${color}">${i+1} [${m.verdict.toUpperCase()}]</strong>: ${m.description}</li>`;
+      });
+      html += '</ul>';
+      div.innerHTML = html;
+    }
+
+    document.getElementById('btn-save-training').addEventListener('click', async () => {
+      if(markers.length === 0) {
+        alert("Please add at least one marker on the image.");
+        return;
+      }
+      const btn = document.getElementById('btn-save-training');
+      const loader = document.getElementById('train-loader');
+      btn.disabled = true;
+      loader.style.display = 'block';
+
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const storageRef = ref(storage, `training/${Date.now()}.jpg`);
+        await uploadString(storageRef, dataUrl, 'data_url');
+        const imageUrl = await getDownloadURL(storageRef);
+
+        const classification = markers.every(m => m.verdict === 'good') ? 'good' : 
+                               markers.every(m => m.verdict === 'bad') ? 'bad' : 'mixed';
+        
+        await addDoc(collection(db, "AI Metering"), {
+          imageUrl,
+          meterType: document.getElementById('meter-type').value,
+          annotations: markers,
+          classification,
+          notes: markers.map(m => m.description).join(' | '),
+          timestamp: new Date().toISOString()
+        });
+
+        alert('Training example saved!');
+        
+        markers = [];
+        updateMarkersList();
+        document.getElementById('canvas-wrapper').style.display = 'none';
+        document.getElementById('train-form').style.display = 'none';
+        document.getElementById('train-file').value = '';
+        loadTrainingGrid();
+
+      } catch (err) {
+        alert("Error saving: " + err.message);
+      } finally {
+        btn.disabled = false;
+        loader.style.display = 'none';
+      }
+    });
+
+    async function loadTrainingGrid() {
+      const grid = document.getElementById('training-grid');
+      grid.innerHTML = '<p>Loading...</p>';
+      try {
+        const snapshot = await getDocs(collection(db, "AI Metering"));
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const badgeColor = data.classification === 'good' ? 'var(--good-color)' : data.classification === 'bad' ? 'var(--bad-color)' : 'var(--warning-color)';
+          html += `
+            <div class="grid-item">
+              <img src="${data.imageUrl}" alt="Training img">
+              <div class="grid-content">
+                <div style="font-size:0.8rem; text-transform:uppercase; color: ${badgeColor}; font-weight:bold;">${data.classification} Example</div>
+                <div style="font-size:0.8rem; margin-top:0.25rem;">${data.meterType} Meter</div>
+                <div style="font-size:0.8rem; margin-top:0.25rem; color: #9ca3af;">${data.annotations?.length || 0} markers</div>
+              </div>
+            </div>
+          `;
+        });
+        grid.innerHTML = html || '<p>No training examples found.</p>';
+      } catch (err) {
+        grid.innerHTML = '<p style="color:var(--bad-color)">Error loading examples</p>';
+        console.error(err);
+      }
+    }
+  </script>
 </body>
 </html>
